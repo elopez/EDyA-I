@@ -1,11 +1,12 @@
 #!/bin/sh
 CC=$(which gcc)
 INCLUDES="-I../include/"
+OPTS="-Wall -Wextra -pedantic $INCLUDES"
 
 cd $(dirname $0)
 
 # readfile
-$CC $INCLUDES -o readfile readfile.c ../libs/readfile.c
+$CC $OPTS -o readfile readfile.c ../libs/readfile.c
 ./readfile > tmpfile
 COUNT=$(diff tmpfile /etc/hosts|wc -l)
 

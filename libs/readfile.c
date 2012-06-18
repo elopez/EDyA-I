@@ -5,7 +5,7 @@
 
 #include <libs/readfile.h>
 
-char **readfile(FILE* file)
+char **readfile(FILE* file, unsigned int* count)
 {
     unsigned int i;
     unsigned int lineqty = READFILE_DEFAULT_LINES;
@@ -46,6 +46,9 @@ char **readfile(FILE* file)
     }
 
     /* if we're here it means we read all lines correctly */
+    if (count != NULL)
+        *count = i;
+
     return lines;
 }
 

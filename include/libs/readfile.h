@@ -8,13 +8,15 @@
 /*  readfile: reads a file to memory
  *
  *  arguments: FILE* as obtained with fopen
+ *             unsigned int * (optional) to be updated with the
+ *                 number of read lines
  *
  *  returns: NULL on error
  *           char ** with the lines on success
  *
  *  notes: you can free the char** with freereadfile
  */
-char ** readfile(FILE*);
+char ** readfile(FILE*, unsigned int *);
 
 /*  freereadfile: frees a file on memory
  *
