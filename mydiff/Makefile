@@ -13,8 +13,7 @@ directories:
 	mkdir $(OBJ)
 
 clean:
-	rm -f $(OBJ)/* $(BIN)/*
-	rmdir $(OBJ) $(BIN)
+	rm -rf $(OBJ) $(BIN)
 
 $(OBJ)/%.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
