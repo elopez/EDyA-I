@@ -9,11 +9,11 @@ CFLAGS=-I$(IDIR) -Ofast -DNDEBUG -Wall -Wextra -pedantic --std=c99
 build: directories $(BIN)/mydiff
 
 directories:
-	mkdir $(BIN)
-	mkdir $(OBJ)
+	@mkdir -p $(BIN)
+	@mkdir -p $(OBJ)
 
 clean:
-	rm -rf $(OBJ) $(BIN)
+	@rm -rf $(OBJ) $(BIN)
 
 $(OBJ)/%.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
