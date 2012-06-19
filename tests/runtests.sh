@@ -10,7 +10,7 @@ OPTS="-Wall -Wextra -pedantic --std=c99 $INCLUDES"
 cd $(dirname $0)
 
 # readfile
-$CC $OPTS -o readfile readfile.c ../libs/readfile.c
+$CC $OPTS -o readfile readfile.c ../shared/readfile.c
 ./readfile > tmpfile
 COUNT=$(diff tmpfile /etc/hosts|wc -l)
 
@@ -24,7 +24,7 @@ rm tmpfile readfile
 
 
 # diff
-$CC $OPTS -o tdiff diff.c ../libs/readfile.c ../libs/diff.c
+$CC $OPTS -o tdiff diff.c ../shared/readfile.c ../shared/diff.c
 ./tdiff > out1
 diff testfile/diff* > out2
 
