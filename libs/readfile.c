@@ -38,6 +38,7 @@ char **readfile(FILE* file, unsigned int* count)
         }
 
         /* read a line and handle any errors appropriately */
+        lines[i] = NULL;
         if (getline(&lines[i], &linesize, file) == -1 && !feof(file))
         {
             lines[i] = NULL;
