@@ -31,7 +31,7 @@ struct rule *diff_lines(char **alines, unsigned int aqty,
     unsigned int upper;
     unsigned int d;
     unsigned int k;
-    struct rule *rules[maxqty+1];
+    struct rule *rules[2*maxqty+1];
     struct rule *rule;
 
     /* find out common strings on start */
