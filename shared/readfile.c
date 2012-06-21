@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <libs/readfile.h>
+#include <shared/readfile.h>
 
 char **readfile(FILE* file, unsigned int* count)
 {

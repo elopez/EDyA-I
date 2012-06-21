@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-#include <libs/diff.h>
-#include <libs/readfile.h>
+#include <shared/diff.h>
+#include <shared/readfile.h>
 
 int main(void)
 {

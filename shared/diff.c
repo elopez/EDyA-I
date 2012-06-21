@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <libs/diff.h>
+#include <shared/diff.h>
 
 static struct rule *diff_invert_rules(struct rule *list)
 {
