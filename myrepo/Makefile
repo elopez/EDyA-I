@@ -3,7 +3,9 @@ IDIR=../include
 SDIR=../shared
 OBJ=../obj
 BIN=../bin
-CFLAGS=-I$(IDIR) -Ofast -DNDEBUG -Wall -Wextra -pedantic --std=c99
+CFLAGS=-I$(IDIR) -DNDEBUG -D_POSIX_C_SOURCE=200112L \
+       -Wall -Wextra -pedantic --std=c99 \
+       -Ofast
 
 .PHONY: build directories clean
 build: directories $(BIN)/myrepo
@@ -21,5 +23,5 @@ $(OBJ)/%.o: %.c
 $(OBJ)/%.o: $(SDIR)/%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(BIN)/myrepo: $(OBJ)/myrepo.o $(OBJ)/usage.o $(OBJ)/init.o
+$(BIN)/myrepo: $(OBJ)/usage.o $(OBJ)/init.o $(OBJ)/addrm.o $(OBJ)/catalog.o $(OBJ)/myrepo.o
 	$(CC) -o $@ $^ $(CFLAGS)

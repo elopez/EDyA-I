@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <myrepo/usage.h>
+
 int myrepo_usage(char *name)
 {
     fprintf(stderr, "Usage: %s \n"

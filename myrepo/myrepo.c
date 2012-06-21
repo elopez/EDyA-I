@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <myrepo/addrm.h>
+#include <myrepo/init.h>
+#include <myrepo/usage.h>
+#include <myrepo/catalog.h>
+
 #define OPTION(name)    if(strcmp((name), argv[1]) == 0)
 
 int main(int argc, char *argv[])
@@ -13,13 +18,17 @@ int main(int argc, char *argv[])
     }
 
     OPTION("add") {
-        puts("add");
-        return 0;
+        if (argc >=3)
+            return myrepo_addrm(argv + 2, catalog_add);
+        else
+            return myrepo_usage(argv[0]);
     }
 
     OPTION("rm") {
-        puts("rm");
-        return 0;
+        if (argc >=3)
+            return myrepo_addrm(argv + 2, catalog_remove);
+        else
+            return myrepo_usage(argv[0]);
     }
 
     OPTION("status") {

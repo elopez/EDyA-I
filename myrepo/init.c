@@ -6,6 +6,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <myrepo/init.h>
+
 int myrepo_init(void)
 {
     struct stat st;
@@ -22,18 +24,19 @@ int myrepo_init(void)
 
         return 1;
     }
-    
+
     /* Linux extension magic here */
     curdir = getcwd(NULL, 0);
-    
+
     if (curdir != NULL)
     {
+        /* visit every parent dir and check for a repo; abort if found */
         for(i=strlen(curdir)-1; i > 0; i--)
         {
             if (curdir[i] == '/')
             {
                 curdir[i] = '\0';
-                chdir(curdir);            
+                chdir(curdir);
                 if(stat(".index", &st) == 0 && S_ISDIR(st.st_mode))
                 {
                     fprintf(stderr, "You are inside a repository. Aborting.\n");
@@ -43,8 +46,7 @@ int myrepo_init(void)
                 curdir[i] = '/';
             }
         }
-        
-        /* restore the full original path */
+
         chdir(curdir);
         free(curdir);
     }
