@@ -17,11 +17,17 @@ directories:
 clean:
 	@rm -rf $(OBJ) $(BIN)
 
+# Don't use -pedantic on the gcc sha1 code
+$(OBJ)/sha1.o: sha1.c
+	$(CC) -c -o $@ $< -I$(IDIR) -Ofast
+
 $(OBJ)/%.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(OBJ)/%.o: $(SDIR)/%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(BIN)/myrepo: $(OBJ)/usage.o $(OBJ)/init.o $(OBJ)/addrm.o $(OBJ)/catalog.o $(OBJ)/myrepo.o
+$(BIN)/myrepo: $(OBJ)/usage.o $(OBJ)/init.o $(OBJ)/addrm.o \
+               $(OBJ)/catalog.o $(OBJ)/sha1.o $(OBJ)/hash.o \
+               $(OBJ)/myrepo.o
 	$(CC) -o $@ $^ $(CFLAGS)
