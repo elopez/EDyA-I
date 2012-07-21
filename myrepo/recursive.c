@@ -9,10 +9,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <myrepo/addrm.h>
 #include <myrepo/catalog.h>
+#include <myrepo/recursive.h>
 
-int myrepo_addrm_recursive(char *directory, callback function)
+int myrepo_recursive_step2(char *directory, callback function, void* extra)
 {
     char *name[2];
     int dirlen = strlen(directory);
@@ -46,7 +46,7 @@ int myrepo_addrm_recursive(char *directory, callback function)
 
         /* add whatever we saw, if it is a directory it will
          * call us back */
-        myrepo_addrm(name, function);
+        myrepo_recursive(name, function, extra);
 
         free(name[0]);
     }
@@ -55,7 +55,7 @@ int myrepo_addrm_recursive(char *directory, callback function)
     return 0;
 }
 
-int myrepo_addrm(char **filename, callback function)
+int myrepo_recursive(char **filename, callback function, void* extra)
 {
     struct stat st;
     FILE* catalog;
@@ -79,7 +79,10 @@ int myrepo_addrm(char **filename, callback function)
         fprintf(stderr, "Failed to open repository catalog.\n");
         return 1;
     }
-
+    
+    if (extra == NULL)
+        extra = catalog;
+    
     do {
         fname = (char *) malloc(strlen(*filename) + 2);
         if (fname == NULL)
@@ -94,9 +97,9 @@ int myrepo_addrm(char **filename, callback function)
         if(stat(fname, &st) == 0)
         {
             if(S_ISDIR(st.st_mode))
-                myrepo_addrm_recursive(fname, function);
+                myrepo_recursive_step2(fname, function, extra);
             else if(S_ISREG(st.st_mode))
-                function(catalog, fname);
+                function(fname, extra);
             else {
                 fprintf(stderr, "%s: not a regular file or directory\n",
                     fname);
@@ -111,4 +114,14 @@ int myrepo_addrm(char **filename, callback function)
     } while (*filename != NULL);
 
     return 0;
+}
+
+void myrepo_add(char* name, void* extra)
+{
+    catalog_add((FILE*)extra, name);
+}
+
+void myrepo_remove(char* name, void* extra)
+{
+    catalog_add((FILE*)extra, name);
 }
