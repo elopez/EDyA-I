@@ -20,8 +20,8 @@ static struct rule *diff_invert_rules(struct rule *list)
     return newlist;
 }
 
-struct rule *diff_lines(char **alines, unsigned int aqty,
-                         char **blines, unsigned int bqty)
+int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
+                char **blines, unsigned int bqty)
 {
     unsigned int row = 0;
     unsigned int col = 0;
@@ -50,7 +50,7 @@ struct rule *diff_lines(char **alines, unsigned int aqty,
 
     /* row == aqty && row == bqty */
     if (lower > upper)
-        return NULL;
+        return DIFF_SAME;
 
     /* for each value of the edit distance */
     for (d = 1; d <= 2*maxqty; d++)
@@ -60,7 +60,7 @@ struct rule *diff_lines(char **alines, unsigned int aqty,
         {
             rule = (struct rule *)malloc(sizeof(struct rule));
             if (rule == NULL)
-                return NULL; /* TODO: free resources */
+                return DIFF_ERROR; /* TODO: free resources */
 
             /* Find a d on diagonal k */
             if (k == maxqty-d ||
@@ -99,7 +99,10 @@ struct rule *diff_lines(char **alines, unsigned int aqty,
 
             /* this is the bottom-right corner, we have our answer! */
             if (row == aqty && col == bqty)
-                return diff_invert_rules(rules[k]);
+            {
+                *ruleset = diff_invert_rules(rules[k]);
+                return DIFF_OK;
+            }
 
             /* range checks */
             if (row == aqty)
@@ -112,7 +115,7 @@ struct rule *diff_lines(char **alines, unsigned int aqty,
         upper++;
     }
 
-    return NULL; /* BUG! */
+    return DIFF_ERROR;
 }
 
 void diff_print(FILE* stream, struct rule *rules, char **alines, char **blines)

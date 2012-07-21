@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
     unsigned int alength, blength;
     char **alines, **blines;
     struct rule *rules;
+    int status;
 
     if (argc != 3 && argc >= 1)
     {
@@ -51,14 +52,17 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    rules = diff_lines(alines, alength, blines, blength);
+    status = diff_lines(&rules, alines, alength, blines, blength);
 
-    if (rules == NULL) {
-        fprintf(stderr, "Error computing differences / the files are identical.\n");
+    if (status == DIFF_ERROR) {
+        fprintf(stderr, "Error computing differences.\n");
         return 4;
     }
-
-    diff_print(stdout, rules, alines, blines);
+    
+    /* Don't print rules if the files are identical */
+    if (status != DIFF_SAME) {
+        diff_print(stdout, rules, alines, blines);
+    }
 
     /* Free and close everything */
     freereadfile(alines);
