@@ -21,7 +21,7 @@ int main(void)
     if (alines == NULL || blines == NULL)
         return 0;
 
-    rules = diff_lines(alines, alength, blines, blength);
+    diff_lines(&rules, alines, alength, blines, blength);
 
     diff_print(stdout, rules, alines, blines);
 
