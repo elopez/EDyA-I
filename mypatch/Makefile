@@ -3,7 +3,7 @@ IDIR=../include
 SDIR=../shared
 OBJ=../obj
 BIN=../bin
-CFLAGS=-I$(IDIR) -g -Ofast -DNDEBUG -Wall -Wextra -pedantic --std=c99
+CFLAGS=-I$(IDIR) -Ofast -DNDEBUG -Wall -Wextra -pedantic --std=c99
 
 .PHONY: build directories clean
 build: directories $(BIN)/mypatch
