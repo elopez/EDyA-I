@@ -43,3 +43,18 @@ else
 fi
 
 rm out1 out2 tdiff patchme*
+
+#patch
+$CC $OPTS -o tpatch patch.c ../shared/readfile.c ../shared/patch.c
+diff testfile/diff1 testfile/diff2 > patchfile
+./tpatch > out1
+
+COUNT=$(diff -u out1 testfile/diff2|wc -l)
+
+if [ ! "$COUNT" = "0" ]; then
+    echo "$ERR patch $END"
+else
+    echo "$OK patch $END"
+fi
+
+rm out1 tpatch patchfile
