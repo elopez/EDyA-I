@@ -6,7 +6,7 @@
 int main(void)
 {
     unsigned int alength, blength;
-    char **alines, **blines;
+    char **alines, **blines, **newfile;
 	unsigned int i = 0;
 
     FILE* filea = fopen("testfile/diff1", "r");
@@ -21,10 +21,10 @@ int main(void)
     if (alines == NULL || blines == NULL)
         return 0;
 
-    patch_file(&alines, alength, blines, blength);
+    patch_file(alines, alength, blines, blength, &newfile);
 
-	while (alines[i] != NULL)
-		printf("%s", alines[i++]);
+	while (newfile[i] != NULL)
+		printf("%s", newfile[i++]);
 
     return 0;
 }

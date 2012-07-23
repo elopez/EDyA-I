@@ -7,7 +7,7 @@
 int main(int argc, char *argv[])
 {
     unsigned int alength, blength;
-    char **alines, **blines;
+    char **alines, **blines, **newfile;
     int status;
 
     if (argc != 3 && argc >= 1)
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    status = patch_file(&alines, alength, blines, blength);
+    status = patch_file(alines, alength, blines, blength, &newfile);
 
     if (status == PATCH_ERROR) {
         fprintf(stderr, "Error patching.\n");
@@ -61,13 +61,14 @@ int main(int argc, char *argv[])
     /* Write patched contents */
     unsigned int i = 0;
     filea = freopen(argv[1], "w+", filea);
-    while(alines[i] != NULL)
-        fprintf(filea, "%s", alines[i++]);
+    while(newfile[i] != NULL)
+        fprintf(filea, "%s", newfile[i++]);
 
 
     /* Free and close everything */
-    //freereadfile(alines);
-    //freereadfile(blines);
+    freereadfile(alines);
+    freereadfile(blines);
+    freereadfile(newfile);
     fclose(filea);
     fclose(fileb);
 
