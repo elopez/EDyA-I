@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         return 3;
     }
 
-    status = patch_file(alines, alength, blines, blength, &newfile);
+    status = patch_file(alines, alength, blines, blength, &newfile, NULL);
 
     if (status == PATCH_ERROR) {
         fprintf(stderr, "Error patching.\n");

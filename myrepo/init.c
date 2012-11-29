@@ -51,7 +51,8 @@ int myrepo_init(void)
         free(curdir);
     }
 
-    if(mkdir(".index", 0770) == -1 || mkdir(".index/revs", 0770) == -1)
+    if(mkdir(".index", 0770) == -1 || mkdir(".index/revs", 0770) == -1
+        || mkdir(".index/hashes", 0770) == -1)
     {
         fprintf(stderr, "Error creating index.\n");
         return 1;
@@ -66,6 +67,17 @@ int myrepo_init(void)
     }
 
     fprintf(fd, "created=%u\n", (unsigned int) time(NULL));
+    fclose(fd);
+
+    fd = fopen(".index/revs/latest", "w");
+
+    if (fd == NULL)
+    {
+        fprintf(stderr, "Error creating revision tracking file.\n");
+        return 1;
+    }
+
+    fprintf(fd, "%d", 0);
     fclose(fd);
 
     fprintf(stdout, "Repository initialized correctly.\n");

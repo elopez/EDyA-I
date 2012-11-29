@@ -9,7 +9,7 @@ int myrepo_usage(char *name)
                     " -  add <file/directory> (<file/directory> ..)\n"
                     " -  rm <file/directory> (<file/directory> ..)\n"
                     " -  status\n"
-                    " -  commit\n"
+                    " -  commit -m \"commit message\"\n"
                     " -  log (<revision>)\n"
                     " -  compare <path/to/repo1> <path/to/repo2>\n", name);
     return 1;

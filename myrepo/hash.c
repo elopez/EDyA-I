@@ -52,10 +52,11 @@ char* hash_file(char *path)
     blk_SHA1_Final((unsigned char *)bhash, &ctx);
 
     /* generate hex representation. binary hash is *big endian* */
-    #define PIECE(i) (ntohl(*(unsigned int*)(bhash + (i)*sizeof(unsigned int))))
-    sprintf(hash, "%8x%8x%8x%8x%8x", PIECE(0), PIECE(1), PIECE(2),
+    #define PIECE(i) (ntohl(*(unsigned int*)((unsigned char*)bhash + (i)*sizeof(unsigned int))))
+    sprintf(hash, "%08x%08x%08x%08x%08x", PIECE(0), PIECE(1), PIECE(2),
         PIECE(3), PIECE(4));
 
+	fclose(file);
     free(bhash);
     return hash;
 }

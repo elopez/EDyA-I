@@ -10,5 +10,6 @@ int myrepo_recursive(char **filename, callback function, void* extra);
 /* Wrappers to catalog */
 void myrepo_add(char*, void*);
 void myrepo_remove(char*, void*);
+void myrepo_untracked(char *, void *);
 
 #endif

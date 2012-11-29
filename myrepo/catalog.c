@@ -5,12 +5,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <shared/cleanup.h>
+
+#include <myrepo/hashtree.h>
 #include <myrepo/catalog.h>
 
 char *catalog_locate(void)
 {
     struct stat st;
     static char *curdir = NULL;
+    char *origindir;
     int i;
 
     /* cache the location */
@@ -25,8 +29,12 @@ char *catalog_locate(void)
 
     /* check current dir */
     if (stat(".index", &st) == 0 && S_ISDIR(st.st_mode) &&
-        stat(".index/contents", &st) == 0 && S_ISREG(st.st_mode))
+        stat(".index/contents", &st) == 0 && S_ISREG(st.st_mode)) {
+        cleanup_register(curdir, free);
         return curdir;
+    }
+
+    origindir = strdup(curdir);
 
     /* visit every parent dir and check for a catalog */
     for(i=strlen(curdir)-1; i > 0; i--)
@@ -40,17 +48,18 @@ char *catalog_locate(void)
                 stat(".index/contents", &st) == 0 && S_ISREG(st.st_mode))
             {
                 /* found, return to starting point */
-                curdir[i] = '/';
-                chdir(curdir);
-                curdir[i] = '\0';
+                chdir(origindir);
+                free(origindir);
 
+                cleanup_register(curdir, free);
                 return curdir;
             }
         }
     }
 
     /* go back to where we started */
-    chdir(curdir);
+    chdir(origindir);
+    free(origindir);
     free(curdir);
 
     return NULL;
@@ -66,7 +75,7 @@ FILE* catalog_open(void)
         return NULL;
 
     catalog = (char *) malloc((strlen(catalogpath) +
-        strlen("/.index/contents")) * sizeof(char));
+        strlen("/.index/contents") + 1) * sizeof(char));
     sprintf(catalog, "%s/.index/contents", catalogpath);
     fp = fopen(catalog, "a+");
     free(catalog);
@@ -90,8 +99,12 @@ int catalog_exists(FILE* fp, char* file)
 
         i = 0;
         fgets(line, 1049, fp);
-        while(i < 1049 && line[i] != '=')
+        while(i < 1049 && line[i] != '=' && line[i] != '\0')
             i++;
+
+        /* malformed line */
+        if (line[i] == '\0')
+            continue;
 
         line[i] = '\0';
         op = line;
@@ -137,7 +150,6 @@ void catalog_remove(FILE* fp, char* file)
     if (fpn == NULL)
     {
         free(catalog);
-        puts("BUG");
         return;
     }
 
@@ -169,4 +181,75 @@ void catalog_remove(FILE* fp, char* file)
     freopen(oldcatalog, "a+", fp);
     free(oldcatalog);
     free(catalog);
+}
+
+char* catalog_hash(FILE* fp, HashTreeNode **copytree, int store)
+{
+    unsigned int i;
+    char line[1050];
+    char *op;
+    char *value;
+    char *hash;
+    char *catalogpath = catalog_locate();
+    char *dump;
+    HashTreeNode* tree = hashtree_new();
+    FILE* fpdump;
+
+    if (tree == NULL)
+        return NULL;
+
+    chdir(catalogpath);
+
+    rewind(fp);
+
+    while(!feof(fp))
+    {
+        i = 0;
+        fgets(line, 1049, fp);
+        while(i < 1049 && line[i] != '=' && line[i] != '\0')
+            i++;
+
+        /* malformed line */
+        if (line[i] == '\0')
+            continue;
+
+        line[i] = '\0';
+        op = line;
+        value = line+i+1;
+        value[strlen(value)-1] = '\0';
+
+        if (strcmp(op, "file") == 0)
+            hashtree_insert(tree, value, NULL);
+    }
+
+    hash = hashtree_compute(tree);
+
+    if (copytree != NULL)
+        *copytree = tree;
+    /* else
+        TODO free tree? */
+
+    if (!store)
+        return hash;
+
+    dump = malloc((strlen(catalogpath) + 60) * sizeof(char));
+    if (dump == NULL)
+        return NULL;
+
+    sprintf(dump, "%s/.index/hashes/%s", catalogpath, hash);
+    fpdump = fopen(dump, "w+");
+
+    if (fpdump == NULL)
+    {
+        free(dump);
+        free(hash);
+        return NULL;
+    }
+
+    hashtree_print(tree, fpdump);
+
+    fclose(fpdump);
+    free(dump);
+
+    return hash;
 }

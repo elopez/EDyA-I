@@ -1,11 +1,16 @@
-CC=gcc
+CC=cgcc
 IDIR=../include
 SDIR=../shared
 OBJ=../obj
 BIN=../bin
-CFLAGS=-I$(IDIR) -DNDEBUG -D_POSIX_C_SOURCE=200112L \
-       -Wall -Wextra -pedantic --std=c99 \
-       -Ofast
+CFLAGS=-I$(IDIR) -D_POSIX_C_SOURCE=200809L \
+       -Wall -Wextra -pedantic --std=c99
+
+ifeq ($(DEBUG),)
+    CFLAGS+= -DNDEBUG -Ofast
+else
+    CFLAGS+=-O0 -g
+endif
 
 .PHONY: build directories clean
 build: directories $(BIN)/myrepo
@@ -27,7 +32,9 @@ $(OBJ)/%.o: %.c
 $(OBJ)/%.o: $(SDIR)/%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(BIN)/myrepo: $(OBJ)/usage.o $(OBJ)/init.o $(OBJ)/addrm.o \
+$(BIN)/myrepo: $(OBJ)/usage.o $(OBJ)/init.o $(OBJ)/recursive.o \
                $(OBJ)/catalog.o $(OBJ)/sha1.o $(OBJ)/hash.o \
-               $(OBJ)/myrepo.o
+               $(OBJ)/hashtree.o $(OBJ)/commit.o $(OBJ)/log.o \
+               $(OBJ)/patch.o $(OBJ)/diff.o $(OBJ)/readfile.o \
+               $(OBJ)/mkpath.o $(OBJ)/cleanup.o $(OBJ)/myrepo.o
 	$(CC) -o $@ $^ $(CFLAGS)

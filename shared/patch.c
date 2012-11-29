@@ -9,15 +9,19 @@
 #define HUNK_APPEND (1 << 2)
 #define HUNK_REMOVE (1 << 3)
 
-int patch_file(char *** filep, unsigned int filelen,
-                char ** patch, unsigned int patchlen)
+int patch_file(char ** fileold, unsigned int filelen,
+                char ** patch, unsigned int patchlen,
+                char *** newfilep, unsigned int *newlen)
 {
     unsigned int i, j;
     unsigned int hunktype = HUNK_NONE;
-    unsigned int oldstart, oldend, newstart, newend;
+    unsigned int oldstart, oldend, newstart, newend, count = 0;
 
-    char ** file = *filep;
+    char ** file = (char**) calloc(sizeof(char *), filelen+1);
+    if(filelen > 0)
+        memcpy(file, fileold, sizeof(char *) * filelen);
     char ** newfile = (char **) calloc(sizeof(char *), filelen + patchlen);
+    *newfilep = newfile;
 
     /* Parse patch file */
     for (i=0; i < patchlen; i++)
@@ -64,6 +68,10 @@ int patch_file(char *** filep, unsigned int filelen,
             else
                 newend = atoi(patch[i] + j + 1);
 
+            /* Well-formedness checks */
+            if (newend < newstart || oldend < oldstart || oldend > filelen)
+                return PATCH_ERROR;
+
             continue;
         /* Fast forward over the patch */
         } else if (hunktype == HUNK_NONE) {
@@ -105,7 +113,7 @@ int patch_file(char *** filep, unsigned int filelen,
 
     i = j = 0;
     /* Copy the not changed lines */
-    while (file[i] != NULL)
+    while (file[i] != NULL && --filelen)
     {
         /* if it's a deleted line, skip it */
         if (file[i] == (char *) 0xDEADBEEF) {
@@ -118,11 +126,19 @@ int patch_file(char *** filep, unsigned int filelen,
             j++;
 
         /* Move the line */
-        newfile[j] = file[i];
+        newfile[j] = (char *) malloc(strlen(file[i])+1); /* TODO */
+        strcpy(newfile[j], file[i]);
         i++;
     }
 
-    *filep = newfile;
-    /* TODO: clean old file? */
+    if(newlen != NULL) {
+        while(newfile[count] != NULL)
+            count++;
+        *newlen = count;
+    }
+
+    /* Clean temporary file representation */
+    free(file);
+
     return PATCH_OK;
 }
