@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <shared/diff.h>
 
@@ -209,5 +210,19 @@ void diff_print(FILE* stream, struct rule *rules, char **alines, char **blines)
                 break;
         }
 
+    }
+}
+
+void diff_free_rules(struct rule *rules)
+{
+    struct rule *tmp;
+
+    /* There's no point in freeing a null pointer */
+    assert(rules != NULL);
+
+    while (rules != NULL) {
+        tmp = rules->previous;
+        free(rules);
+        rules = tmp;
     }
 }

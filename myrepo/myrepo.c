@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     }
 
     OPTION("commit") {
-        if (argc >= 4)
+        if (argc >= 4 && !strcmp(argv[2], "-m"))
             return myrepo_commit(argv[3]);
         else
             return myrepo_usage(argv[0]);

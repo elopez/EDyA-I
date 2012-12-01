@@ -17,10 +17,10 @@ int patch_file(char ** fileold, unsigned int filelen,
     unsigned int hunktype = HUNK_NONE;
     unsigned int oldstart, oldend, newstart, newend, count = 0;
 
-    char ** file = (char**) calloc(sizeof(char *), filelen+1);
+    char ** file = (char**) calloc(filelen+1, sizeof(char *));
     if(filelen > 0)
         memcpy(file, fileold, sizeof(char *) * filelen);
-    char ** newfile = (char **) calloc(sizeof(char *), filelen + patchlen);
+    char ** newfile = (char **) calloc(filelen + patchlen, sizeof(char *));
     *newfilep = newfile;
 
     /* Parse patch file */
@@ -126,8 +126,7 @@ int patch_file(char ** fileold, unsigned int filelen,
             j++;
 
         /* Move the line */
-        newfile[j] = (char *) malloc(strlen(file[i])+1); /* TODO */
-        strcpy(newfile[j], file[i]);
+        newfile[j] = strdup(file[i]);
         i++;
     }
 

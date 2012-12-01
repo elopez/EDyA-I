@@ -7,7 +7,7 @@
 
 int mkpath(char *path, mode_t mode)
 {
-    unsigned int i;
+    unsigned int i = 0;
 
     assert(path != NULL);
 

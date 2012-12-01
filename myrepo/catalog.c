@@ -83,7 +83,7 @@ FILE* catalog_open(void)
     return fp;
 }
 
-int catalog_exists(FILE* fp, char* file)
+int catalog_exists(FILE* fp, const char* file)
 {
     int i;
     int linenr = 0;
@@ -119,13 +119,13 @@ int catalog_exists(FILE* fp, char* file)
     return 0;
 }
 
-void catalog_add(FILE* fp, char* file)
+void catalog_add(FILE* fp, const char* file)
 {
     if (!catalog_exists(fp, file))
         fprintf(fp, "file=%s\n", file);
 }
 
-void catalog_remove(FILE* fp, char* file)
+void catalog_remove(FILE* fp, const char* file)
 {
     int i;
     int linenr;

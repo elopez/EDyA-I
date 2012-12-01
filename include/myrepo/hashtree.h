@@ -2,6 +2,7 @@
 #define __H_HASHTREE__
 
 #define DEFAULT_MAX_CHILDREN 50
+#define DEFAULT_MAX_DIFF 50
 #define HASHTREE_DELIM ((HashTreeNode*)0xDEADBEEF)
 
 typedef struct HashTreeNode {

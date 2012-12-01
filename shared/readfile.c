@@ -39,17 +39,22 @@ char **readfile(FILE* file, unsigned int* count)
 
         /* read a line and handle any errors appropriately */
         lines[i] = NULL;
-        if (getline(&lines[i], &linesize, file) == -1 && !feof(file))
-        {
-            lines[i] = NULL;
-            freereadfile(lines);
-            return NULL;
+        if (getline(&lines[i], &linesize, file) == -1) {
+            free(lines[i]);
+            lines[i--] = NULL;
+
+            if(!feof(file)) {
+                freereadfile(lines);
+                return NULL;
+            }
         }
     }
 
     /* if we're here it means we read all lines correctly */
     if (count != NULL)
         *count = i;
+
+    lines[i] = NULL;
 
     return lines;
 }

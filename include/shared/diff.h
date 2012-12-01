@@ -21,4 +21,6 @@ int diff_lines(struct rule **, char **, unsigned int, char **, unsigned int);
 
 void diff_print(FILE*, struct rule *, char **, char **);
 
+void diff_free_rules(struct rule *rules);
+
 #endif
