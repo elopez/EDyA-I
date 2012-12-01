@@ -1,15 +1,15 @@
-CC=cgcc
+CC=gcc
 IDIR=../include
 SDIR=../shared
 OBJ=../obj
 BIN=../bin
-CFLAGS=-I$(IDIR) -D_POSIX_C_SOURCE=200809L \
-       -Wall -Wextra -pedantic --std=c99
+CFLAGS=-I$(IDIR) -D_POSIX_C_SOURCE=200809L --std=c99
 
 ifeq ($(DEBUG),)
-    CFLAGS+= -DNDEBUG -Ofast
+    CFLAGS+= -DNDEBUG -Ofast -DSPEC_COMPLIANT
 else
-    CFLAGS+=-O0 -g
+    CFLAGS+=-O0 -g -Wall -Wextra -pedantic
+    CC=$(shell which cgcc > /dev/null && echo cgcc || echo gcc)
 endif
 
 .PHONY: build directories clean
