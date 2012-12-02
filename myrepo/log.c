@@ -25,10 +25,7 @@ int myrepo_log(void)
     
     revision = commit_latest(catalogpath, 0);
     
-    /* Try to output to a pager */
-    fp = popen("sensible-pager || less || more || cat 2>/dev/null", "w");
-    if (fp == NULL || fp == (FILE*)-1)
-        fp = stdout;
+    fp = pager_init();
     
     revpath = (char*) malloc(strlen(catalogpath) + 100); /* TODO */
     
@@ -61,8 +58,7 @@ int myrepo_log(void)
         fclose(frev);
     } while (--revision != 0);
     
-    if (fp != stdout)
-        pclose(fp);
+    pager_close(fp);
     
     free(revpath);
     
