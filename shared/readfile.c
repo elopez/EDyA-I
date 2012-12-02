@@ -5,12 +5,13 @@
 #include <string.h>
 
 #include <shared/readfile.h>
+#include <shared/salloc.h>
 
 char **readfile(FILE* file, unsigned int* count)
 {
     unsigned int i;
     unsigned int lineqty = READFILE_DEFAULT_LINES;
-    char **lines = (char **)malloc(READFILE_DEFAULT_LINES * sizeof(char *));
+    char **lines = (char **)smalloc(READFILE_DEFAULT_LINES * sizeof(char *));
     size_t linesize = 0;
     void *newblock;
 
@@ -23,18 +24,8 @@ char **readfile(FILE* file, unsigned int* count)
         if (i == lineqty)
         {
             lineqty += READFILE_DEFAULT_LINES;
-            newblock = realloc(lines, lineqty * sizeof(char *));
-
-            if (newblock != NULL)
-            {
-                /* all went well! */
-                lines = (char **)newblock;
-            } else {
-                /* clean up, we cannot continue */
-                lines[i-1] = NULL;
-                freereadfile(lines);
-                return NULL;
-            }
+            newblock = srealloc(lines, lineqty * sizeof(char *));
+            lines = (char **)newblock;
         }
 
         /* read a line and handle any errors appropriately */

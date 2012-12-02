@@ -5,12 +5,12 @@ END="\033[0m"
 
 CC=$(which gcc)
 INCLUDES="-I../include/"
-OPTS="-Wall -Wextra -pedantic --std=c99 $INCLUDES"
+OPTS="-Wall -Wextra -pedantic --std=c99 -D_POSIX_C_SOURCE=200809L $INCLUDES"
 
 cd $(dirname $0)
 
 # readfile
-$CC $OPTS -o readfile readfile.c ../shared/readfile.c
+$CC $OPTS -o readfile readfile.c ../shared/readfile.c ../shared/salloc.c
 ./readfile > tmpfile
 COUNT=$(diff tmpfile /etc/hosts|wc -l)
 
@@ -24,7 +24,7 @@ rm tmpfile readfile
 
 
 # diff
-$CC $OPTS -o tdiff diff.c ../shared/readfile.c ../shared/diff.c
+$CC $OPTS -o tdiff diff.c ../shared/readfile.c ../shared/diff.c ../shared/salloc.c
 ./tdiff > out1
 diff testfile/diff* > out2
 

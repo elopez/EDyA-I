@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <shared/salloc.h>
+
 #include <myrepo/catalog.h>
 #include <myrepo/commit.h>
 #include <myrepo/recursive.h>
@@ -38,7 +40,7 @@ static int myrepo_recursive_step2(char *directory, callback function, void* extr
             strcmp(".index", de->d_name) == 0)
             continue;
 
-        name[0] = (char *) malloc((strlen(de->d_name) +
+        name[0] = (char *) smalloc((strlen(de->d_name) +
             dirlen + 4) * sizeof(char));
         sprintf(name[0], "%s/%s", directory, de->d_name);
         name[1] = NULL;
@@ -90,7 +92,7 @@ int myrepo_recursive(char **filename, callback function, void* extra)
     chdir(catalog_locate());
 
     do {
-        fname = (char *) malloc(strlen(*filename) + strlen(relative) + 2);
+        fname = (char *) smalloc((strlen(*filename) + strlen(relative) + 2) * sizeof(char));
         if (fname == NULL)
             continue;
 

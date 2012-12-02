@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include <shared/cleanup.h>
+#include <shared/salloc.h>
 
 #include <myrepo/hash.h>
 #include <myrepo/hashtree.h>
@@ -29,13 +30,7 @@ HashTreeNode* hashtree_new_node(const char* name)
 
     /* duplicate name for ourselves */
     assert(name != NULL);
-    ourname = malloc((strlen(name) + 1) * sizeof(char));
-    if (ourname == NULL)
-    {
-        free(tree);
-        return NULL;
-    }
-    strcpy(ourname, name);
+    ourname = strdup(name);
 
     tree->name = ourname;
     tree->children = (HashTreeNode**) calloc(DEFAULT_MAX_CHILDREN,
@@ -165,17 +160,10 @@ char *hashtree_compute(HashTreeNode* tree)
         return (char*) tree->hash;
 
     /* space for binary hash */
-    bhash = malloc(20 * sizeof(unsigned char));
-    if (bhash == NULL)
-        return NULL;
+    bhash = smalloc(20 * sizeof(unsigned char));
 
     /* get some memory to store the hex and bin representation */
-    hash = (char *) malloc(41 * sizeof(char));
-    if (hash == NULL)
-    {
-        free(bhash);
-        return NULL;
-    }
+    hash = (char *) smalloc(41 * sizeof(char));
 
     /* initialize */
     blk_SHA1_Init(&ctx);
@@ -344,7 +332,7 @@ static struct list *hashtree_compare_int(HashTreeNode* old, HashTreeNode* new, s
             hash = hashtree_fetch(old, new->children[i]->name);
             if (hash == NULL || strcmp(hash, new->children[i]->hash))
             {
-                tmp2 = malloc(sizeof(struct list)); /* TODO */
+                tmp2 = smalloc(sizeof(struct list));
                 tmp2->name = new->children[i]->name;
                 tmp2->next = tmp;
                 tmp = tmp2;
@@ -372,22 +360,13 @@ const char** hashtree_compare(HashTreeNode* old, HashTreeNode* new)
     tmp = hashtree_compare_int(old, new, NULL);
 
     /* convert to a plain array */
-    table = calloc(DEFAULT_MAX_DIFF, sizeof(char*)); /*TODO*/
-    if (table == NULL) {
-        fprintf(stderr, "Error allocating memory for table\n");
-        return NULL;
-    }
+    table = scalloc(DEFAULT_MAX_DIFF, sizeof(char*));
 
     tableiter = table;
     for(; tmp != NULL; count++) {
         if (size == count) {
             size += DEFAULT_MAX_DIFF;
-            table = realloc(table, size * sizeof(char*));
-            if (table == NULL)
-            {
-                fprintf(stderr, "Error reallocating memory for table\n");
-                return NULL;
-            }
+            table = srealloc(table, size * sizeof(char*));
             tableiter = table + size - DEFAULT_MAX_DIFF - 1;
         }
         *(tableiter++) = tmp->name;

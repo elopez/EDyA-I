@@ -9,6 +9,7 @@
 #include <shared/diff.h>
 #include <shared/mkpath.h>
 #include <shared/readfile.h>
+#include <shared/salloc.h>
 
 #include <myrepo/catalog.h>
 #include <myrepo/commit.h>
@@ -61,7 +62,7 @@ int myrepo_commit(const char *message)
     revision = commit_latest(catalogpath, 1);
 
     /* Store commit message and match version and hash */
-    revpath = (char*) malloc(strlen(catalogpath) + 100);
+    revpath = (char*) smalloc((strlen(catalogpath) + 100) * sizeof(char));
     sprintf(revpath, "%s/.index/revs/%d.rev", catalogpath, revision);
     commit = fopen(revpath, "w");
     if (commit == NULL)
@@ -106,7 +107,7 @@ HashTreeNode * commit_loadtree(const char *catalogpath, unsigned int revision)
     FILE* fd;
     HashTreeNode* tree;
     char tmphash[50];
-    char* revpath = (char*) malloc(strlen(catalogpath) + 100);
+    char* revpath = (char*) smalloc((strlen(catalogpath) + 100) * sizeof(char));
 
     /* Revision 0 is an empty tree */
     if (revision == 0)
@@ -117,6 +118,7 @@ HashTreeNode * commit_loadtree(const char *catalogpath, unsigned int revision)
     fd = fopen(revpath, "r+");
     if (fd == NULL)
     {
+        free(revpath);
         fprintf(stderr, "Failed to figure out old revision hash.\n");
         return NULL;
     }
@@ -141,12 +143,13 @@ unsigned int commit_latest(const char *catalogpath, int increment)
     unsigned int len;
 
     len = strlen(catalogpath) + 100;
-    revpath = (char*) malloc(len); /* TODO */
+    revpath = (char*) smalloc(len * sizeof(char));
     snprintf(revpath, len, "%s/.index/revs/latest", catalogpath);
     fd = fopen(revpath, "r+");
     if (fd == NULL)
     {
         fprintf(stderr, "Failed to figure out revision number.\n");
+        free(revpath);
         return 1;
     }
     fscanf(fd, "%u", &revision);
@@ -203,7 +206,7 @@ static int commit_file_is_involved(const char *catalogpath, unsigned int rev, co
     if (rev == 0)
         return 0;
 
-    revpath = (char*) malloc(strlen(catalogpath) + 100); /* TODO */
+    revpath = (char*) smalloc((strlen(catalogpath) + 100) * sizeof(char));
 
     /* Find out revision hash */
     sprintf(revpath, "%s/.index/revs/%d.rev", catalogpath, rev);
@@ -248,7 +251,7 @@ unsigned int commit_file(const char *catalogpath, unsigned int rev, const char *
     filenewlen = fileoldlen;
     fclose(fp);
 
-    path = (char*) malloc(strlen(catalogpath)+strlen(file)+100); /* TODO? */
+    path = (char*) smalloc((strlen(catalogpath)+strlen(file)+100)*sizeof(char));
 
     for (i = 1; i <= rev; i++)
     {
@@ -288,7 +291,7 @@ int commit_diff(char *catalogpath, unsigned int rev, const char *file, FILE *fp)
     struct rule *rules;
 
     if (fp == NULL) {
-        path = (char*) malloc(strlen(catalogpath)+strlen(file)+100); /* TODO? */
+        path = (char*) smalloc((strlen(catalogpath)+strlen(file)+100)*sizeof(char));
         sprintf(path, "%s/.index/patches/%u/%s.patch", catalogpath, rev+1, file+2);
         mkpath(path, 0770); /* TODO */
         diff = fopen(path, "w"); /* TODO */
@@ -304,6 +307,7 @@ int commit_diff(char *catalogpath, unsigned int rev, const char *file, FILE *fp)
         printf("Dropping deleted file from catalog: %s\n", file);
         fcurrent = catalog_open();
         catalog_remove(fcurrent, file);
+        freereadfile(fcontents);
         fclose(fcurrent);
         return 0;
     }

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <shared/salloc.h>
+
 #include <myrepo/hash.h>
 #include <myrepo/sha1.h>
 
@@ -23,20 +25,8 @@ char* hash_file(char *path)
         return NULL;
 
     /* get some memory to store the hex and bin representation */
-    hash = (char *) malloc(41 * sizeof(char));
-    if (hash == NULL)
-    {
-        fclose(file);
-        return NULL;
-    }
-
-    bhash = malloc(20 * sizeof(unsigned char));
-    if (bhash == NULL)
-    {
-        fclose(file);
-        free(hash);
-        return NULL;
-    }
+    hash = (char *) smalloc(41 * sizeof(char));
+    bhash = smalloc(20 * sizeof(unsigned char));
 
     /* initialize */
     blk_SHA1_Init(&ctx);

@@ -3,7 +3,7 @@ IDIR=../include
 SDIR=../shared
 OBJ=../obj
 BIN=../bin
-CFLAGS=-I$(IDIR) -Ofast -DNDEBUG -Wall -Wextra -pedantic --std=c99
+CFLAGS=-I$(IDIR) -Ofast -DNDEBUG -Wall -Wextra -pedantic --std=c99 -D_POSIX_C_SOURCE=200809L
 
 .PHONY: build directories clean
 build: directories $(BIN)/mypatch
@@ -21,5 +21,5 @@ $(OBJ)/%.o: %.c
 $(OBJ)/%.o: $(SDIR)/%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(BIN)/mypatch: $(OBJ)/mypatch.o $(OBJ)/readfile.o $(OBJ)/patch.o
+$(BIN)/mypatch: $(OBJ)/mypatch.o $(OBJ)/readfile.o $(OBJ)/salloc.o $(OBJ)/patch.o
 	$(CC) -o $@ $^ $(CFLAGS)

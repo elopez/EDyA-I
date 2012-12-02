@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include <shared/pager.h>
+#include <shared/salloc.h>
 
 #include <myrepo/catalog.h>
 #include <myrepo/commit.h>
@@ -29,11 +30,7 @@ int myrepo_log(void)
     fp = pager_init();
     revision = commit_latest(catalogpath, 0);
 
-    revpath = (char *)malloc(strlen(catalogpath) + 100);
-    if (revpath == NULL) {
-        fprintf(stderr, "Error allocating memory for catalog path\n");
-        return 1;
-    }
+    revpath = (char *)smalloc(strlen(catalogpath) + 100);
 
     do {
         sprintf(revpath, "%s/.index/revs/%d.rev", catalogpath, revision);

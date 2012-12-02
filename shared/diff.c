@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include <shared/salloc.h>
 #include <shared/diff.h>
 
 static struct rule *diff_invert_rules(struct rule *list)
@@ -59,9 +60,7 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
         /* for each relevant diagonal */
         for (k = lower; k <= upper; k += 2)
         {
-            rule = (struct rule *)malloc(sizeof(struct rule));
-            if (rule == NULL)
-                return DIFF_ERROR; /* TODO: free resources */
+            rule = (struct rule *)smalloc(sizeof(struct rule));
 
             /* Find a d on diagonal k */
             if (k == maxqty-d ||

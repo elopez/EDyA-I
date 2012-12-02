@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include <shared/cleanup.h>
+#include <shared/salloc.h>
 
 #include <myrepo/hashtree.h>
 #include <myrepo/catalog.h>
@@ -74,7 +75,7 @@ FILE* catalog_open(void)
     if(catalogpath == NULL)
         return NULL;
 
-    catalog = (char *) malloc((strlen(catalogpath) +
+    catalog = (char *) smalloc((strlen(catalogpath) +
         strlen("/.index/contents") + 1) * sizeof(char));
     sprintf(catalog, "%s/.index/contents", catalogpath);
     fp = fopen(catalog, "a+");
@@ -142,7 +143,7 @@ void catalog_remove(FILE* fp, const char* file)
     if (linenr == 0)
         return;
 
-    catalog = (char *) malloc((strlen(catalogpath) +
+    catalog = (char *) smalloc((strlen(catalogpath) +
         strlen("/.index/contents.tmp")) * sizeof(char));
     sprintf(catalog, "%s/.index/contents.tmp", catalogpath);
     fpn = fopen(catalog, "w+");
@@ -173,8 +174,8 @@ void catalog_remove(FILE* fp, const char* file)
     fclose(fpn);
 
     /* remove .tmp */
-    oldcatalog = malloc(strlen(catalog) * sizeof(char)); /* TODO */
-    strncpy(oldcatalog, catalog, strlen(catalog)-4);
+    oldcatalog = strdup(catalog);
+    oldcatalog[strlen(oldcatalog)-4] = '\0';
 
     /* replace the catalog atomically */
     rename(catalog, oldcatalog);
