@@ -45,7 +45,10 @@ int main(int argc, char *argv[])
     }
 
     OPTION("log") {
-        return myrepo_log();
+        if (argc >= 3)
+            return myrepo_logdiff(atoi(argv[2]));
+        else
+            return myrepo_log();
     }
 
     OPTION("commit") {

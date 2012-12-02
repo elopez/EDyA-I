@@ -15,8 +15,6 @@
 
 #include <myrepo/hashtree.h>
 
-static int commit_diff(char *catalogpath, unsigned int rev, const char *file);
-
 int myrepo_commit(const char *message)
 {
     FILE* catalog;
@@ -89,7 +87,7 @@ int myrepo_commit(const char *message)
     } else {
         for (int i=0; differences[i] != NULL; i++) {
             fprintf(commit, "involved=%s\n", differences[i]);
-            commit_diff(catalogpath, revision, differences[i]);
+            commit_diff(catalogpath, revision-1, differences[i], NULL);
         }
         free(differences);
     }
@@ -252,7 +250,7 @@ unsigned int commit_file(const char *catalogpath, unsigned int rev, const char *
 
     path = (char*) malloc(strlen(catalogpath)+strlen(file)+100); /* TODO? */
 
-    for (i = 0; i <= rev; i++)
+    for (i = 1; i <= rev; i++)
     {
         if(commit_file_is_involved(catalogpath, i, file))
         {
@@ -277,7 +275,7 @@ unsigned int commit_file(const char *catalogpath, unsigned int rev, const char *
     return filenewlen;
 }
 
-static int commit_diff(char *catalogpath, unsigned int rev, const char *file)
+int commit_diff(char *catalogpath, unsigned int rev, const char *file, FILE *fp)
 {
     FILE *fcurrent;
     FILE *diff;
@@ -289,15 +287,19 @@ static int commit_diff(char *catalogpath, unsigned int rev, const char *file)
     unsigned int fcurrlen;
     struct rule *rules;
 
-    path = (char*) malloc(strlen(catalogpath)+strlen(file)+100); /* TODO? */
-    sprintf(path, "%s/.index/patches/%u/%s.patch", catalogpath, rev, file+2);
-    mkpath(path, 0770); /* TODO */
-    diff = fopen(path, "w"); /* TODO */
-    free(path);
+    if (fp == NULL) {
+        path = (char*) malloc(strlen(catalogpath)+strlen(file)+100); /* TODO? */
+        sprintf(path, "%s/.index/patches/%u/%s.patch", catalogpath, rev+1, file+2);
+        mkpath(path, 0770); /* TODO */
+        diff = fopen(path, "w"); /* TODO */
+        free(path);
+    } else {
+        diff = fp;
+    }
 
-    flen = commit_file(catalogpath, rev-1, file, &fcontents);
+    flen = commit_file(catalogpath, rev, file, &fcontents);
     fcurrent = fopen(file, "r");
-    if (fcurrent == NULL) /* TODO use stat? */
+    if (fcurrent == NULL && fp == NULL) /* TODO use stat? */
     {
         printf("Dropping deleted file from catalog: %s\n", file);
         fcurrent = catalog_open();
@@ -319,7 +321,8 @@ static int commit_diff(char *catalogpath, unsigned int rev, const char *file)
     freereadfile(fcontents);
     freereadfile(fcurrcontents);
 
-    fclose(diff);
+    if (fp == NULL)
+        fclose(diff);
 
     return 0;
 }

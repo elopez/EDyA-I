@@ -75,3 +75,59 @@ int myrepo_log(void)
 
     return 0;
 }
+
+int myrepo_logdiff(unsigned int revision)
+{
+    FILE *fp;
+    FILE *catalog;
+    char *catalogpath = catalog_locate();
+    const char **differences;
+    HashTreeNode *old;
+    HashTreeNode *new;
+
+    if (catalogpath == NULL) {
+        fprintf(stderr, "You are not inside a repository, aborting.\n");
+        return 1;
+    }
+
+    catalog = catalog_open();
+    if (catalog == NULL) {
+        fprintf(stderr, "Failed to open repository catalog.\n");
+        return 1;
+    }
+
+    /* Initialize output stream */
+    fp = pager_init();
+
+    /* Hash the current catalog but do not store it to disk */
+    catalog_hash(catalog, &new, 0);
+
+    fclose(catalog);
+
+    if (revision == 0) {
+        old = hashtree_new();   /* empty tree */
+        hashtree_compute(old);
+    } else {
+        old = commit_loadtree(catalogpath, revision);
+        if (old == NULL)
+            return 1;
+    }
+
+    /* Compare the trees */
+    differences = hashtree_compare(old, new);
+
+    if (differences == NULL) {
+        printf("No changes.\n");
+    } else {
+        for (int i = 0; differences[i] != NULL; i++) {
+            fprintf(fp, "File: %s\n", differences[i]);
+            commit_diff(catalogpath, revision, differences[i], fp);
+            fprintf(fp, "\n\n");
+        }
+        free(differences);
+    }
+
+    pager_close(fp);
+
+    return 0;
+}
