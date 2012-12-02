@@ -106,8 +106,10 @@ int myrepo_logdiff(unsigned int revision)
         hashtree_compute(old);
     } else {
         old = commit_loadtree(catalogpath, revision);
-        if (old == NULL)
+        if (old == NULL) {
+            pager_close(fp);
             return 1;
+        }
     }
 
     /* Compare the trees */
