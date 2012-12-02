@@ -45,7 +45,7 @@ fi
 rm out1 out2 tdiff patchme*
 
 #patch
-$CC $OPTS -o tpatch patch.c ../shared/readfile.c ../shared/patch.c
+$CC $OPTS -o tpatch patch.c ../shared/readfile.c ../shared/patch.c ../shared/salloc.c
 diff testfile/diff1 testfile/diff2 > patchfile
 ./tpatch > out1
 

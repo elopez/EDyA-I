@@ -113,7 +113,7 @@ int patch_file(char ** fileold, unsigned int filelen,
 
     i = j = 0;
     /* Copy the not changed lines */
-    while (file[i] != NULL && --filelen)
+    while (file[i] != NULL && filelen--)
     {
         /* if it's a deleted line, skip it */
         if (file[i] == (char *) 0xDEADBEEF) {
