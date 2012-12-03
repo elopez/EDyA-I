@@ -8,10 +8,12 @@
 #include <myrepo/hash.h>
 #include <myrepo/sha1.h>
 
-char* hash_file(char *path)
+#define PIECE(i) (ntohl(*(unsigned int*)((unsigned char*)bhash + (i)*sizeof(unsigned int))))
+
+char *hash_file(char *path)
 {
     blk_SHA_CTX ctx;
-    FILE* file;
+    FILE *file;
     char buffer[4096];
     char *hash;
     void *bhash;
@@ -25,16 +27,15 @@ char* hash_file(char *path)
         return NULL;
 
     /* get some memory to store the hex and bin representation */
-    hash = (char *) smalloc(41 * sizeof(char));
+    hash = smalloc(41 * sizeof(char));
     bhash = smalloc(20 * sizeof(unsigned char));
 
     /* initialize */
     blk_SHA1_Init(&ctx);
 
     /* feed hash function */
-    while(!feof(file))
-    {
-        len = fread(buffer, sizeof(char), sizeof(buffer)/sizeof(char), file);
+    while (!feof(file)) {
+        len = fread(buffer, sizeof(char), sizeof(buffer) / sizeof(char), file);
         blk_SHA1_Update(&ctx, buffer, len);
     }
 
@@ -42,11 +43,10 @@ char* hash_file(char *path)
     blk_SHA1_Final((unsigned char *)bhash, &ctx);
 
     /* generate hex representation. binary hash is *big endian* */
-    #define PIECE(i) (ntohl(*(unsigned int*)((unsigned char*)bhash + (i)*sizeof(unsigned int))))
     sprintf(hash, "%08x%08x%08x%08x%08x", PIECE(0), PIECE(1), PIECE(2),
-        PIECE(3), PIECE(4));
+            PIECE(3), PIECE(4));
 
-	fclose(file);
+    fclose(file);
     free(bhash);
     return hash;
 }
