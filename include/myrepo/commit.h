@@ -3,7 +3,7 @@
 #ifndef __H_COMMIT__
 #define __H_COMMIT__
 
-/*
+/**
  * Commits the current repository status for the files included on the
  * catalog.
  * @param[int]  message         A user-specified message to associate to the commit
@@ -11,22 +11,25 @@
  */
 int myrepo_commit(const char *message);
 
-/*
+/**
  * Loads the hash tree associated to a specific commit.
  * @param[in]   catalogpath     the catalog path
  * @param[in]   revision        the commit revision to use
+ * @return the hash tree requested, or NULL if an error occured
  */
 HashTreeNode *commit_loadtree(const char *catalogpath, unsigned int revision);
 
-/*
+/**
  * Finds out the latest commit number on the repository and, optionally,
  * increments it by one
  * @param[in]   catalogpath     the catalog path
  * @param[in]   increment       increment the commit number by 1 (or not)
+ * @return the latest commit number, with the increment applied if requested,
+ *         or 0 if an error occured
  */
 unsigned int commit_latest(const char *catalogpath, int increment);
 
-/*
+/**
  * Compares the current file against the one stored on a specific revision
  * @param[in]   catalogpath     the catalog path
  * @param[in]   revision        the commit revision to compare against
@@ -36,7 +39,7 @@ unsigned int commit_latest(const char *catalogpath, int increment);
 int commit_filestatus(const char *catalogpath, unsigned int revision,
                       const char *file);
 
-/*
+/**
  * Generates a file as it was on a specific revision.
  * @param[in]   catalogpath     the catalog path
  * @param[in]   revision        the commit revision to use
@@ -47,7 +50,7 @@ int commit_filestatus(const char *catalogpath, unsigned int revision,
 unsigned int commit_file(const char *catalogpath, unsigned int revision,
                          const char *file, char ***fcontents);
 
-/*
+/**
  * Diffs the current file against the one stored on a specific revision.
  * Depending on fp value, it will store the diff (commit mode, NULL fp) or
  * show it via fp

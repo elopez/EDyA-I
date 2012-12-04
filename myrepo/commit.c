@@ -144,7 +144,7 @@ unsigned int commit_latest(const char *catalogpath, int increment)
     if (fd == NULL) {
         fprintf(stderr, "Failed to find out latest revision number.\n");
         free(revpath);
-        return 1;
+        return 0;
     }
     fscanf(fd, "%u", &revision);
 
