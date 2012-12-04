@@ -32,7 +32,6 @@ int myrepo_commit(const char *message)
         fprintf(stderr, "You are not inside a repository, aborting.\n");
         return 1;
     }
-
 #ifdef SPEC_COMPLIANT
     revpath = getcwd(NULL, 0);  /* temporal use */
     if (revpath != NULL && strcmp(revpath, catalogpath)) {
@@ -293,19 +292,6 @@ int commit_diff(char *catalogpath, unsigned int revision, const char *file,
     unsigned int fcurrlen;
     struct rule *rules;
 
-    /* fp == NULL means we are in commit mode */
-    if (fp == NULL) {
-        path = smalloc((strlen(catalogpath) + strlen(file) + 100) *
-                       sizeof(char));
-        sprintf(path, "%s/.index/patches/%u/%s.patch", catalogpath,
-                revision + 1, file + 2);
-        mkpath(path, 0770);     /* TODO */
-        diff = fopen(path, "w");    /* TODO */
-        free(path);
-    } else {                    /* fp != NULL means display mode */
-        diff = fp;
-    }
-
     flen = commit_file(catalogpath, revision, file, &fcontents);
     fcurrent = fopen(file, "r");
     if (fcurrent == NULL && fp == NULL) {   /* TODO use stat? */
@@ -327,16 +313,31 @@ int commit_diff(char *catalogpath, unsigned int revision, const char *file,
     status = diff_lines(&rules, fcontents, flen, fcurrcontents, fcurrlen);
 
     assert(status != DIFF_ERROR);
-    assert(status != DIFF_SAME);
+    assert(status != DIFF_SAME || (flen == 0 && fcurrlen == 0));
 
-    diff_print(diff, rules, fcontents, fcurrcontents);
+    if (status != DIFF_SAME) {
+        /* fp == NULL means we are in commit mode */
+        if (fp == NULL) {
+            path = smalloc((strlen(catalogpath) + strlen(file) + 100) *
+                           sizeof(char));
+            sprintf(path, "%s/.index/patches/%u/%s.patch", catalogpath,
+                    revision + 1, file + 2);
+            mkpath(path, 0770); /* TODO */
+            diff = fopen(path, "w");    /* TODO */
+            free(path);
+        } else {                /* fp != NULL means display mode */
+            diff = fp;
+        }
 
-    diff_free_rules(rules);
+        diff_print(diff, rules, fcontents, fcurrcontents);
+        diff_free_rules(rules);
+
+        if (fp == NULL)
+            fclose(diff);
+    }
+
     freereadfile(fcontents);
     freereadfile(fcurrcontents);
-
-    if (fp == NULL)
-        fclose(diff);
 
     return 0;
 }

@@ -20,7 +20,7 @@ int patch_file(char ** fileold, unsigned int filelen,
     char ** file = (char**) calloc(filelen+1, sizeof(char *));
     if(filelen > 0)
         memcpy(file, fileold, sizeof(char *) * filelen);
-    char ** newfile = (char **) calloc(filelen + patchlen, sizeof(char *));
+    char ** newfile = (char **) calloc(filelen + patchlen + 1, sizeof(char *));
     *newfilep = newfile;
 
     /* Parse patch file */

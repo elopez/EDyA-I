@@ -50,6 +50,11 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
     lower = (row == aqty) ? maxqty + 1 : maxqty - 1;
     upper = (row == bqty) ? maxqty - 1 : maxqty + 1;
 
+    /* Empty files are obviously the same. lower and upper are unsigned
+     * so the next check won't catch it (upper overflows) */
+    if (aqty == 0 && bqty == 0)
+        return DIFF_SAME;
+
     /* row == aqty && row == bqty */
     if (lower > upper)
         return DIFF_SAME;
