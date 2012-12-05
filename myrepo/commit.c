@@ -169,6 +169,10 @@ int commit_filestatus(const char *catalogpath, unsigned int revision,
     static unsigned int oldrev = 0;
     const char *oldhash;
 
+    /* rev 0 doesn't have any files */
+    if (revision == 0)
+        return 1;
+
     /* Hash the current tree once */
     if (new == NULL) {
         catalog = catalog_open();

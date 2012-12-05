@@ -228,6 +228,7 @@ const char *hashtree_fetch(HashTreeNode * tree, const char *cpath)
     HashTreeNode *current = tree;
     char *path = strdup(cpath); /* TODO */
 
+    assert(tree != NULL);
     assert(path != NULL);
 
     len = strlen(path);
