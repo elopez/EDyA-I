@@ -4,11 +4,12 @@
 #define DEFAULT_MAX_CHILDREN 50
 #define DEFAULT_MAX_DIFF 50
 
+/* Well-aligned on both x86 (4x4=16) and x86_64 (8x4=32) */
 typedef struct HashTreeNode {
     const char *name;
     const char *hash;
     struct HashTreeNode **children;
-    unsigned int _childpos;
+    unsigned long int _childpos;
 } HashTreeNode;
 
 /**
