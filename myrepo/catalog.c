@@ -152,7 +152,7 @@ void catalog_remove(FILE * fp, const char *file)
 
     /* Open a new catalog */
     catalog = smalloc((strlen(catalogpath) +
-                       strlen("/.index/contents.tmp")) * sizeof(char));
+                       strlen("/.index/contents.tmp") + 1) * sizeof(char));
     sprintf(catalog, "%s/.index/contents.tmp", catalogpath);
     fpn = fopen(catalog, "w+");
 
