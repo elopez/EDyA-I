@@ -3,8 +3,8 @@
 #include <string.h>
 #include <time.h>
 
-#include <shared/pager.h>
 #include <shared/salloc.h>
+#include <shared/pager.h>
 
 #include <myrepo/catalog.h>
 #include <myrepo/commit.h>
@@ -30,7 +30,7 @@ int myrepo_log(void)
     fp = pager_init();
     revision = commit_latest(catalogpath, 0);
 
-    revpath = (char *)smalloc(strlen(catalogpath) + 100);
+    revpath = smalloc((strlen(catalogpath) + 100) * sizeof(char));
 
     do {
         sprintf(revpath, "%s/.index/revs/%d.rev", catalogpath, revision);

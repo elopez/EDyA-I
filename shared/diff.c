@@ -65,7 +65,7 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
         /* for each relevant diagonal */
         for (k = lower; k <= upper; k += 2)
         {
-            rule = (struct rule *)smalloc(sizeof(struct rule));
+            rule = smalloc(sizeof(struct rule));
 
             /* Find a d on diagonal k */
             if (k == maxqty-d ||

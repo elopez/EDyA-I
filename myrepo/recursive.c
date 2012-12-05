@@ -37,8 +37,7 @@ static int myrepo_recursive_step2(char *directory, callback function,
             strcmp("..", de->d_name) == 0 || strcmp(".index", de->d_name) == 0)
             continue;
 
-        name[0] = (char *)smalloc((strlen(de->d_name) +
-                                   dirlen + 4) * sizeof(char));
+        name[0] = smalloc((strlen(de->d_name) + dirlen + 4) * sizeof(char));
         sprintf(name[0], "%s/%s", directory, de->d_name);
         name[1] = NULL;
 

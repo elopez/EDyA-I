@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <shared/readfile.h>
 #include <shared/salloc.h>
+#include <shared/readfile.h>
 
 char **readfile(FILE* file, unsigned int* count)
 {
     unsigned int i;
     unsigned int lineqty = READFILE_DEFAULT_LINES;
-    char **lines = (char **)smalloc(READFILE_DEFAULT_LINES * sizeof(char *));
+    char **lines = smalloc(READFILE_DEFAULT_LINES * sizeof(char *));
     size_t linesize = 0;
     void *newblock;
 

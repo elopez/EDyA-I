@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <shared/salloc.h>
 #include <shared/patch.h>
 
 /* Hunk types */
@@ -17,10 +18,10 @@ int patch_file(char ** fileold, unsigned int filelen,
     unsigned int hunktype = HUNK_NONE;
     unsigned int oldstart, oldend, newstart, newend, count = 0;
 
-    char ** file = (char**) calloc(filelen+1, sizeof(char *));
+    char ** file = scalloc(filelen+1, sizeof(char *));
     if(filelen > 0)
         memcpy(file, fileold, sizeof(char *) * filelen);
-    char ** newfile = (char **) calloc(filelen + patchlen + 1, sizeof(char *));
+    char ** newfile = scalloc(filelen + patchlen + 1, sizeof(char *));
     *newfilep = newfile;
 
     /* Parse patch file */
@@ -92,7 +93,7 @@ int patch_file(char ** fileold, unsigned int filelen,
         /* New lines */
         } else if (patch[i][0] == '>') {
             if (newstart <= newend) {
-                newfile[newstart-1] = malloc(strlen(patch[i])); /* TODO */
+                newfile[newstart-1] = smalloc(strlen(patch[i]) * sizeof(char)); /* TODO */
                 sprintf(newfile[newstart-1], "%s", patch[i] + 2);
                 newstart++;
             }

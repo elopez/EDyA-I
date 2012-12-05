@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <shared/salloc.h>
 #include <shared/cleanup.h>
 
 void cleanup_register(void* element, void (*function)(void *))
@@ -12,7 +13,7 @@ void cleanup_register(void* element, void (*function)(void *))
 	} *list = NULL, *tmp;
 	
 	if (element != NULL) {
-		tmp = malloc(sizeof(struct destroyList)); /* TODO */
+		tmp = smalloc(sizeof(struct destroyList));
 		tmp->next = list;
 		tmp->element = element;
         tmp->function = function;
