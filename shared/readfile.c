@@ -7,25 +7,21 @@
 #include <shared/salloc.h>
 #include <shared/readfile.h>
 
-char **readfile(FILE* file, unsigned int* count)
+char **readfile(FILE * file, unsigned int *count)
 {
     unsigned int i;
     unsigned int lineqty = READFILE_DEFAULT_LINES;
     char **lines = smalloc(READFILE_DEFAULT_LINES * sizeof(char *));
     size_t linesize = 0;
-    void *newblock;
 
     /* files should always be valid */
     assert(file != NULL);
 
-    for (i=0; !feof(file); i++)
-    {
+    for (i = 0; !feof(file); i++) {
         /* we ran out of space, grow our array */
-        if (i == lineqty)
-        {
+        if (i == lineqty) {
             lineqty += READFILE_DEFAULT_LINES;
-            newblock = srealloc(lines, lineqty * sizeof(char *));
-            lines = (char **)newblock;
+            lines = srealloc(lines, lineqty * sizeof(char *));
         }
 
         /* read a line and handle any errors appropriately */
@@ -34,7 +30,7 @@ char **readfile(FILE* file, unsigned int* count)
             free(lines[i]);
             lines[i--] = NULL;
 
-            if(!feof(file)) {
+            if (!feof(file)) {
                 freereadfile(lines);
                 return NULL;
             }
@@ -50,14 +46,14 @@ char **readfile(FILE* file, unsigned int* count)
     return lines;
 }
 
-void freereadfile(char** lines)
+void freereadfile(char **lines)
 {
-    int i;
+    unsigned int i;
 
     /* pointers should always be valid */
     assert(lines != NULL);
 
-    for (i=0; lines[i] != NULL; i++)
+    for (i = 0; lines[i] != NULL; i++)
         free(lines[i]);
 
     free(lines);

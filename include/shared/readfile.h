@@ -5,24 +5,18 @@
 
 #define READFILE_DEFAULT_LINES 50
 
-/*  readfile: reads a file to memory
- *
- *  arguments: FILE* as obtained with fopen
- *             unsigned int * (optional) to be updated with the
- *                 number of read lines
- *
- *  returns: NULL on error
- *           char ** with the lines on success
- *
- *  notes: you can free the char** with freereadfile
+/**
+ * Reads a file to memory
+ * @param[in]   file        FILE * as obtained with fopen
+ * @param[out]  count       (optional) the number of read lines
+ * @return the file contents, or NULL on error
  */
-char ** readfile(FILE*, unsigned int *);
+char **readfile(FILE * file, unsigned int *count);
 
-/*  freereadfile: frees a file on memory
- *
- *  arguments: char ** as obtained with readfile
- *
+/**
+ * Frees a file from memory
+ * @param[in]   contents    The file contents to free
  */
-void freereadfile(char **);
+void freereadfile(char **contents);
 
 #endif
