@@ -12,6 +12,7 @@
 
 struct rule {
     struct rule *previous;
+    struct rule *_free;
     unsigned int operation;
     unsigned int aline;
     unsigned int bline;

@@ -34,7 +34,7 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
     unsigned int d;
     unsigned int k;
     struct rule *rules[2*maxqty+1];
-    struct rule *rule;
+    struct rule *rule = NULL, *tmp;
 
     /* find out common strings on start */
     while(row < aqty && row < bqty && strcmp(alines[row], blines[row]) == 0)
@@ -65,7 +65,9 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
         /* for each relevant diagonal */
         for (k = lower; k <= upper; k += 2)
         {
-            rule = smalloc(sizeof(struct rule));
+            tmp = smalloc(sizeof(struct rule));
+            tmp->_free = rule;
+            rule = tmp;
 
             /* Find a d on diagonal k */
             if (k == maxqty-d ||
@@ -89,7 +91,6 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
             rule->aline = row;
             rule->bline = col = row + k - maxqty;
 
-            /* TODO: leak? */
             rules[k] = rule;
 
             /* slide down the diagonal */
@@ -224,8 +225,11 @@ void diff_free_rules(struct rule *rules)
     /* There's no point in freeing a null pointer */
     assert(rules != NULL);
 
+    /* We need to reinvert it to find out the first ->_free */
+    rules = diff_invert_rules(rules);
+
     while (rules != NULL) {
-        tmp = rules->previous;
+        tmp = rules->_free;
         free(rules);
         rules = tmp;
     }
