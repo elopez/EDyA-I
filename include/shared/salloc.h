@@ -1,7 +1,7 @@
 #ifndef __H_SALLOC__
 #define __H_SALLOC__
 
-/*
+/**
  * Safe malloc implementation.
  * This will abort program execution if the allocation cannot be
  * fulfilled as requested.
@@ -10,7 +10,7 @@
  */
 void *smalloc(size_t size);
 
-/*
+/**
  * Safe calloc implementation.
  * This will abort program execution if the allocation cannot be
  * fulfilled as requested.
@@ -20,7 +20,7 @@ void *smalloc(size_t size);
  */
 void *scalloc(size_t nmemb, size_t size);
 
-/*
+/**
  * Safe realloc implementation.
  * This will abort program execution if the allocation cannot be
  * fulfilled as requested.
