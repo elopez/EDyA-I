@@ -59,8 +59,10 @@ int main(int argc, char *argv[])
     }
 
     OPTION("compare") {
-        puts("compare");
-        return 0;
+        if (argc >= 4)
+            return myrepo_compare(argv[2], argv[3]);
+        else
+            return myrepo_usage(argv[0]);
     }
 
     return myrepo_usage(argv[0]);
