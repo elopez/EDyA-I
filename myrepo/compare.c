@@ -1,11 +1,52 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include <libgen.h>
 
+#include <shared/diff.h>
+#include <shared/readfile.h>
+
 #include <myrepo/compare.h>
 #include <myrepo/commit.h>
 #include <myrepo/hashtree.h>
+
+static int compare_diff(char *catalogpath1, unsigned int rev1,
+                        char *catalogpath2, unsigned int rev2, const char *file)
+{
+    char **file1;
+    char **file2;
+    unsigned int len1;
+    unsigned int len2;
+    struct rule *rules;
+    int status;
+
+    /* Load both files */
+    len1 = commit_file(catalogpath1, rev1, file, &file1);
+    len2 = commit_file(catalogpath2, rev2, file, &file2);
+
+    /* And diff them */
+    status = diff_lines(&rules, file1, len1, file2, len2);
+
+    /* DIFF_SAME is acceptable if both files are empty (one might not exist) */
+    assert(status != DIFF_ERROR);
+    assert(status != DIFF_SAME || (flen == 0 && fcurrlen == 0));
+
+    fprintf(stdout, "File: %s\n", file);
+
+    if (status != DIFF_SAME) {
+        diff_print(stdout, rules, file1, file2);
+        diff_free_rules(rules);
+    } else if (commit_file_is_involved(catalogpath2, rev2, file)) {
+        fprintf(stdout, "The file is empty\n");
+    } else {
+        fprintf(stdout, "The empty file was removed\n");
+    }
+    fprintf(stdout, "\n");
+
+    freereadfile(file1);
+    freereadfile(file2);
+}
 
 int myrepo_compare(char *catalogpath1, char *catalogpath2)
 {
@@ -13,12 +54,13 @@ int myrepo_compare(char *catalogpath1, char *catalogpath2)
     unsigned int latest2;
     HashTreeNode *tree1;
     HashTreeNode *tree2;
+    const char **differences1;
+    const char **differences2;
+    const char **tmp1;
+    const char **tmp2;
 
     assert(catalogpath1 != NULL);
     assert(catalogpath2 != NULL);
-
-    catalogpath1 = strdup(catalogpath1);
-    catalogpath2 = strdup(catalogpath2);
 
     /* Remove any possible end slash */
     catalogpath1[strlen(catalogpath1) - 2] = '\0';
@@ -52,6 +94,37 @@ int myrepo_compare(char *catalogpath1, char *catalogpath2)
         printf("The trees are identical.\n");
         return 0;
     }
+
+    /* Trees are different */
+
+    /* Compare one way */
+    differences1 = hashtree_compare(tree1, tree2);
+    tmp1 = differences1;
+
+    /* Process the differences */
+    while (*tmp1 != NULL) {
+        compare_diff(catalogpath1, latest1, catalogpath2, latest2, *tmp1);
+        tmp1++;
+    }
+
+    /* Now compare the reverse way, to catch files only on the old repo.
+     * Make sure we don't process files twice. */
+    differences2 = hashtree_compare(tree2, tree1);
+    tmp2 = differences2;
+
+    while (*tmp2 != NULL) {
+        tmp1 = differences1;
+        while (*tmp1 != NULL && strcmp(*tmp2, *tmp1))
+            tmp1++;
+
+        if (*tmp1 == NULL)
+            compare_diff(catalogpath1, latest1, catalogpath2, latest2, *tmp2);
+
+        tmp2++;
+    }
+
+    free(differences1);
+    free(differences2);
 
     return 0;
 }

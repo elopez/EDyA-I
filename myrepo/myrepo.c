@@ -8,6 +8,7 @@
 #include <myrepo/usage.h>
 #include <myrepo/catalog.h>
 #include <myrepo/commit.h>
+#include <myrepo/compare.h>
 #include <myrepo/log.h>
 #include <myrepo/recursive.h>
 

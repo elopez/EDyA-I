@@ -200,8 +200,8 @@ int commit_filestatus(const char *catalogpath, unsigned int revision,
     return strcmp(oldhash, hashtree_fetch(new, file));
 }
 
-static int commit_file_is_involved(const char *catalogpath, unsigned int rev,
-                                   const char *file)
+int commit_file_is_involved(const char *catalogpath, unsigned int rev,
+                            const char *file)
 {
     FILE *fd;
     char tmpread[50];
@@ -264,7 +264,12 @@ unsigned int commit_file(const char *catalogpath, unsigned int revision,
         if (commit_file_is_involved(catalogpath, i, file)) {
             sprintf(path, "%s/.index/patches/%u/%s.patch", catalogpath, i,
                     file + 2);
+
+            /* patches for empty files aren't saved, skip them */
             fp = fopen(path, "r");
+            if (fp == NULL)
+                continue;
+
             filepatch = readfile(fp, &filepatchlen);    /* TODO */
             patch_file(fileold, fileoldlen, filepatch, filepatchlen, &filenew, &filenewlen);    /* TODO! */
 

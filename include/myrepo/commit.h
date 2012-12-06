@@ -40,6 +40,16 @@ int commit_filestatus(const char *catalogpath, unsigned int revision,
                       const char *file);
 
 /**
+ * Indicates if a file was involved on a specific revision
+ * @param[in]   catalogpath     the catalog path
+ * @param[in]   revision        the commit revision to check in
+ * @param[in]   file            the file to look for
+ * @return 1 if it was involved, 0 if it was not involved
+ */
+int commit_file_is_involved(const char *catalogpath, unsigned int rev,
+                            const char *file);
+
+/**
  * Generates a file as it was on a specific revision.
  * @param[in]   catalogpath     the catalog path
  * @param[in]   revision        the commit revision to use
