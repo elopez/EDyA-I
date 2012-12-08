@@ -10,17 +10,15 @@ int main(int argc, char *argv[])
     char **alines, **blines, **newfile;
     int status;
 
-    if (argc != 3 && argc >= 1)
-    {
+    if (argc != 3 && argc >= 1) {
         fprintf(stderr, "Usage: %s <original> <patch>\n", argv[0]);
         return 1;
     }
 
-    FILE* filea = fopen(argv[1], "r");
-    FILE* fileb = fopen(argv[2], "r");
+    FILE *filea = fopen(argv[1], "r");
+    FILE *fileb = fopen(argv[2], "r");
 
-    if (filea == NULL || fileb == NULL)
-    {
+    if (filea == NULL || fileb == NULL) {
         fprintf(stderr, "Error opening files.\n");
 
         /* Close any possibly open file */
@@ -61,9 +59,8 @@ int main(int argc, char *argv[])
     /* Write patched contents */
     unsigned int i = 0;
     filea = freopen(argv[1], "w+", filea);
-    while(newfile[i] != NULL)
+    while (newfile[i] != NULL)
         fprintf(filea, "%s", newfile[i++]);
-
 
     /* Free and close everything */
     freereadfile(alines);
