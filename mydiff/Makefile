@@ -3,7 +3,14 @@ IDIR=../include
 SDIR=../shared
 OBJ=../obj
 BIN=../bin
-CFLAGS=-I$(IDIR) -Ofast -DNDEBUG -Wall -Wextra -pedantic --std=c99 -D_POSIX_C_SOURCE=200809L
+CFLAGS=-I$(IDIR) -D_POSIX_C_SOURCE=200809L --std=c99
+
+ifeq ($(DEBUG),)
+    CFLAGS+= -DNDEBUG -Ofast
+else
+    CFLAGS+=-O0 -g -Wall -Wextra -pedantic
+    CC=$(shell which cgcc > /dev/null && echo cgcc || echo gcc)
+endif
 
 .PHONY: build directories clean
 build: directories $(BIN)/mydiff

@@ -11,17 +11,15 @@ int main(int argc, char *argv[])
     struct rule *rules;
     int status;
 
-    if (argc != 3 && argc >= 1)
-    {
+    if (argc != 3 && argc >= 1) {
         fprintf(stderr, "Usage: %s <original> <modified>\n", argv[0]);
         return 1;
     }
 
-    FILE* filea = fopen(argv[1], "r");
-    FILE* fileb = fopen(argv[2], "r");
+    FILE *filea = fopen(argv[1], "r");
+    FILE *fileb = fopen(argv[2], "r");
 
-    if (filea == NULL || fileb == NULL)
-    {
+    if (filea == NULL || fileb == NULL) {
         fprintf(stderr, "Error opening files.\n");
 
         /* Close any possibly open file */
@@ -58,13 +56,14 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error computing differences.\n");
         return 4;
     }
-    
+
     /* Don't print rules if the files are identical */
     if (status != DIFF_SAME) {
         diff_print(stdout, rules, alines, blines);
     }
 
     /* Free and close everything */
+    diff_free_rules(rules);
     freereadfile(alines);
     freereadfile(blines);
     fclose(filea);
