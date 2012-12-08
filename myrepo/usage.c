@@ -11,6 +11,8 @@ int myrepo_usage(char *name)
             " -  status\n"
             " -  commit -m \"commit message\"\n"
             " -  log (<revision>)\n"
-            " -  compare <path/to/repo1> <path/to/repo2>\n", name);
+            " -  compare <path/to/repo1/.index> <path/to/repo2/.index>\n",
+            name);
+
     return 1;
 }
