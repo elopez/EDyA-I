@@ -2,6 +2,7 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <shared/salloc.h>
 
@@ -24,7 +25,7 @@ char *hash_file(char *path)
 
     file = fopen(path, "r");
     if (file == NULL)
-        return NULL;
+        return strdup("deadda1adeadda1adeadda1adeadda1adeadda1a");
 
     /* get some memory to store the hex and bin representation */
     hash = smalloc(41 * sizeof(char));

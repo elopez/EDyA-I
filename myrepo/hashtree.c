@@ -62,7 +62,6 @@ void hashtree_insert(HashTreeNode * tree, char *path, char *hash)
     char found;
     HashTreeNode *current = tree;
     HashTreeNode *child;
-    struct stat st;
 
     assert(tree != NULL);
     assert(path != NULL);
@@ -103,10 +102,7 @@ void hashtree_insert(HashTreeNode * tree, char *path, char *hash)
     hashtree_append_child(current, child);
 
     if (hash == NULL)
-        if (stat(path, &st) == 0)
-            child->hash = hash_file(path);
-        else
-            child->hash = strdup("deadda1adeadda1adeadda1adeadda1adeadda1a");
+        child->hash = hash_file(path);
     else
         child->hash = strdup(hash);
 }

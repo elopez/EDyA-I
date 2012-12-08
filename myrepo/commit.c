@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <shared/patch.h>
 #include <shared/diff.h>
@@ -303,9 +304,10 @@ int commit_diff(char *catalogpath, unsigned int revision, const char *file,
 
     flen = commit_file(catalogpath, revision, file, &fcontents);
     fcurrent = fopen(file, "r");
-    if (fcurrent == NULL && fp == NULL) {   /* TODO use stat? */
+    if (fcurrent == NULL && fp == NULL) {
         /* implicit myrepo rm: file is not there anymore, remove from catalog */
-        printf("Dropping deleted file from catalog: %s\n", file);
+        printf("Dropping %s file from catalog: %s\n",
+               (errno == ENOENT ? "deleted" : "unaccesible"), file);
         fcurrent = catalog_open();
         catalog_remove(fcurrent, file);
         freereadfile(fcontents);
