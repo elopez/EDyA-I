@@ -6,13 +6,15 @@
 
 #include <shared/diff.h>
 #include <shared/readfile.h>
+#include <shared/pager.h>
 
 #include <myrepo/compare.h>
 #include <myrepo/commit.h>
 #include <myrepo/hashtree.h>
 
-static int compare_diff(char *catalogpath1, unsigned int rev1,
-                        char *catalogpath2, unsigned int rev2, const char *file)
+static void compare_diff(char *catalogpath1, unsigned int rev1,
+                        char *catalogpath2, unsigned int rev2, const char *file,
+                        FILE * out)
 {
     char **file1;
     char **file2;
@@ -30,19 +32,19 @@ static int compare_diff(char *catalogpath1, unsigned int rev1,
 
     /* DIFF_SAME is acceptable if both files are empty (one might not exist) */
     assert(status != DIFF_ERROR);
-    assert(status != DIFF_SAME || (flen == 0 && fcurrlen == 0));
+    assert(status != DIFF_SAME || (len1 == 0 && len2 == 0));
 
-    fprintf(stdout, "File: %s\n", file);
+    fprintf(out, "File: %s\n", file);
 
     if (status != DIFF_SAME) {
-        diff_print(stdout, rules, file1, file2);
+        diff_print(out, rules, file1, file2);
         diff_free_rules(rules);
     } else if (commit_file_is_involved(catalogpath2, rev2, file)) {
-        fprintf(stdout, "The file is empty\n");
+        fprintf(out, "The file is empty\n");
     } else {
-        fprintf(stdout, "The empty file was removed\n");
+        fprintf(out, "The empty file was removed\n");
     }
-    fprintf(stdout, "\n");
+    fprintf(out, "\n");
 
     freereadfile(file1);
     freereadfile(file2);
@@ -58,6 +60,7 @@ int myrepo_compare(char *catalogpath1, char *catalogpath2)
     const char **differences2;
     const char **tmp1;
     const char **tmp2;
+    FILE *out;
 
     assert(catalogpath1 != NULL);
     assert(catalogpath2 != NULL);
@@ -97,13 +100,16 @@ int myrepo_compare(char *catalogpath1, char *catalogpath2)
 
     /* Trees are different */
 
+    /* Open a pager to print the diff to */
+    out = pager_init();
+
     /* Compare one way */
     differences1 = hashtree_compare(tree1, tree2);
     tmp1 = differences1;
 
     /* Process the differences */
     while (*tmp1 != NULL) {
-        compare_diff(catalogpath1, latest1, catalogpath2, latest2, *tmp1);
+        compare_diff(catalogpath1, latest1, catalogpath2, latest2, *tmp1, out);
         tmp1++;
     }
 
@@ -118,11 +124,13 @@ int myrepo_compare(char *catalogpath1, char *catalogpath2)
             tmp1++;
 
         if (*tmp1 == NULL)
-            compare_diff(catalogpath1, latest1, catalogpath2, latest2, *tmp2);
+            compare_diff(catalogpath1, latest1, catalogpath2, latest2, *tmp2,
+                         out);
 
         tmp2++;
     }
 
+    pager_close(out);
     free(differences1);
     free(differences2);
 
