@@ -103,7 +103,7 @@ int myrepo_recursive(char **filename, callback function, void *extra)
         else
             sprintf(fname, ".%s/%s", relative, *filename);
 
-        if (stat(fname, &st) == 0) {
+        if (lstat(fname, &st) == 0) {
             if (S_ISDIR(st.st_mode))
                 myrepo_recursive_step2(fname, function, extra);
             else if (S_ISREG(st.st_mode))
