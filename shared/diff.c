@@ -11,8 +11,7 @@ static struct rule *diff_invert_rules(struct rule *list)
     struct rule *newlist = NULL;
     struct rule *tmp;
 
-    while(list != NULL)
-    {
+    while (list != NULL) {
         tmp = list->previous;
         list->previous = newlist;
         newlist = list;
@@ -22,22 +21,22 @@ static struct rule *diff_invert_rules(struct rule *list)
     return newlist;
 }
 
-int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
-                char **blines, unsigned int bqty)
+int diff_lines(struct rule **ruleset, char **alines, unsigned int aqty,
+               char **blines, unsigned int bqty)
 {
     unsigned int row = 0;
     unsigned int col = 0;
-    unsigned int maxqty = (aqty > bqty ? aqty: bqty);
-    unsigned int last_d_pos[2*maxqty+1];
+    unsigned int maxqty = (aqty > bqty ? aqty : bqty);
+    unsigned int *last_d_pos = scalloc(2 * maxqty + 1, sizeof(unsigned int));
     unsigned int lower;
     unsigned int upper;
     unsigned int d;
     unsigned int k;
-    struct rule *rules[2*maxqty+1];
+    struct rule **rules = scalloc(2 * maxqty + 1, sizeof(struct rule *));
     struct rule *rule = NULL, *tmp;
 
     /* find out common strings on start */
-    while(row < aqty && row < bqty && strcmp(alines[row], blines[row]) == 0)
+    while (row < aqty && row < bqty && strcmp(alines[row], blines[row]) == 0)
         row++;
 
     last_d_pos[maxqty] = row;
@@ -60,61 +59,65 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
         return DIFF_SAME;
 
     /* for each value of the edit distance */
-    for (d = 1; d <= 2*maxqty; d++)
-    {
+    for (d = 1; d <= 2 * maxqty; d++) {
         /* for each relevant diagonal */
-        for (k = lower; k <= upper; k += 2)
-        {
+        for (k = lower; k <= upper; k += 2) {
             tmp = smalloc(sizeof(struct rule));
-            tmp->_free = rule;
+            tmp->_free = rule;  /* free chain */
             rule = tmp;
 
-            /* Find a d on diagonal k */
-            if (k == maxqty-d ||
-                (k != maxqty+d && last_d_pos[k+1] >= last_d_pos[k-1]))
-            {
-                /* Moving down from the last d-1 on diagonal k + 1
-                 * puts you farther along diagonal k than does
-                 * moving right from the last d-1 on diagonal k-1.
-                 */
-                row = last_d_pos[k+1]+1;
-                rule->previous = rules[k+1];
+            /* Find a d on diagonal k
+             * if k == maxqty-d, this is the lowest diagonal with d's
+             * so we should move down
+             * if k == maxqty+d, this is the highest diagonal with d's
+             * and we should move right
+             */
+            if (k == maxqty - d ||
+                (k != maxqty + d && last_d_pos[k + 1] >= last_d_pos[k - 1])) {
+                /* Moving down from the last d-1 on diagonal k+1
+                 * puts you further along diagonal k than moving
+                 * right from the last d-1 on diagonal k-1. */
+                row = last_d_pos[k + 1] + 1;
+                rule->previous = rules[k + 1];
                 rule->operation = OP_DELETE;
             } else {
                 /* Move right from the last d-1 on diagonal k-1 */
-                row = last_d_pos[k-1];
-                rule->previous = rules[k-1];
+                row = last_d_pos[k - 1];
+                rule->previous = rules[k - 1];
                 rule->operation = OP_INSERT;
             }
 
-            /* Code common to the two cases. */
-            rule->aline = row;
-            rule->bline = col = row + k - maxqty;
+            /* Calculate the corresponding column */
+            col = row + k - maxqty;
 
+            /* Fill and store the rule on the array for future reference */
+            rule->aline = row;
+            rule->bline = col;
             rules[k] = rule;
 
-            /* slide down the diagonal */
+            /* Slide down the diagonal */
             while (row < aqty && col < bqty &&
-                   strcmp(alines[row], blines[col]) == 0)
-            {
+                   strcmp(alines[row], blines[col]) == 0) {
                 row++;
                 col++;
             }
 
+            /* We have now computed values on diagonal k up to row */
             last_d_pos[k] = row;
 
-            /* this is the bottom-right corner, we have our answer! */
-            if (row == aqty && col == bqty)
-            {
+            /* this is the bottom right corner, we found the smallest
+             * set of rules to go from alines to blines. The algorythm
+             * stops here */
+            if (row == aqty && col == bqty) {
                 *ruleset = diff_invert_rules(rules[k]);
                 return DIFF_OK;
             }
 
             /* range checks */
             if (row == aqty)
-                lower = k+2;
+                lower = k + 2;
             if (col == bqty)
-                upper = k-2;
+                upper = k - 2;
         }
 
         lower--;
@@ -124,95 +127,90 @@ int diff_lines(struct rule ** ruleset, char **alines, unsigned int aqty,
     return DIFF_ERROR;
 }
 
-void diff_print(FILE* stream, struct rule *rules, char **alines, char **blines)
+void diff_print(FILE * stream, struct rule *rules, char **alines, char **blines)
 {
     struct rule *a, *b, *c, *d;
     unsigned int ischange;
     char tag[100];
-    while (rules != NULL)
-    {
-        switch (rules->operation)
-        {
-            case OP_DELETE:
-                b = rules;
+    while (rules != NULL) {
+        switch (rules->operation) {
+        case OP_DELETE:
+            b = rules;
+            do {
+                a = b;
+                b = b->previous;
+            } while (b != NULL && b->operation == OP_DELETE &&
+                     b->aline == a->aline + 1);
+            /* b is now the first op after the block of deletes */
+
+            ischange = (b != NULL && b->operation == OP_INSERT &&
+                        b->aline == a->aline);
+
+            c = d = b;
+            if (ischange) {
+                /* find out how many ones we are changing */
                 do {
-                    a = b;
-                    b = b->previous;
-                } while (b != NULL && b->operation == OP_DELETE &&
-                         b->aline == a->aline+1);
-                /* b is now the first op after the block of deletes */
+                    c = d;
+                    d = d->previous;
+                } while (d != NULL && d->operation == OP_INSERT &&
+                         d->bline == c->bline + 1);
+                /* c now points to the element after the change block */
 
-                ischange = (b != NULL && b->operation == OP_INSERT &&
-                            b->aline == a->aline);
-
-                c = d = b;
-                if (ischange)
-                {
-                    /* find out how many ones we are changing */
-                    do {
-                        c = d;
-                        d = d->previous;
-                    } while (d != NULL && d->operation == OP_INSERT &&
-                             d->bline == c->bline+1);
-                    /* c now points to the element after the change block */
-
-                    if (b == c) /* single line*/
-                        sprintf(tag, "c%d", c->bline);
-                    else
-                        sprintf(tag, "c%d,%d", b->bline, c->bline);
-                } else {
-                   // if (rules == a) /* single line */
-                        sprintf(tag, "d%d", rules->bline);
-                   // else /* does this one make sense? */
-                   //     sprintf(tag, "d%d,%d", rules->bline, a->bline);
-                }
-
-                /* single line */
-                if (rules == a)
-                    fprintf(stream, "%d%s\n", rules->aline, tag);
+                if (b == c)     /* single line */
+                    sprintf(tag, "c%d", c->bline);
                 else
-                    fprintf(stream, "%d,%d%s\n", rules->aline,
-                        a->aline, tag);
+                    sprintf(tag, "c%d,%d", b->bline, c->bline);
+            } else {
+                // if (rules == a) /* single line */
+                sprintf(tag, "d%d", rules->bline);
+                // else /* does this one make sense? */
+                //     sprintf(tag, "d%d,%d", rules->bline, a->bline);
+            }
 
-                do {
-                    fprintf(stream, "< %s", alines[rules->aline-1]);
-                    rules = rules->previous;
-                } while (rules != b);
-                /* now rules is the first insert after the deletes */
-
-                if (ischange)
-                {
-                    fprintf(stream, "---\n");
-                    do {
-                        fprintf(stream, "> %s", blines[rules->bline-1]);
-                        rules = rules->previous;
-                    } while (rules != d);
-                    /* now rules is the first delete after the inserts */
-                }
-                break;
-
-            case OP_INSERT:
-                /* see how many are we adding */
-                b = rules;
-                do {
-                    a = b;
-                    b = b->previous;
-                } while (b != NULL && b->operation == OP_INSERT &&
-                         b->bline == a->bline+1);
-
-                if (rules == a) /* one line */
-                    sprintf(tag, "a%d", a->bline);
-                else
-                    sprintf(tag, "a%d,%d", rules->bline, a->bline);
-
+            /* single line */
+            if (rules == a)
                 fprintf(stream, "%d%s\n", rules->aline, tag);
+            else
+                fprintf(stream, "%d,%d%s\n", rules->aline, a->aline, tag);
 
+            do {
+                fprintf(stream, "< %s", alines[rules->aline - 1]);
+                rules = rules->previous;
+            } while (rules != b);
+            /* now rules is the first insert after the deletes */
+
+            if (ischange) {
+                fprintf(stream, "---\n");
                 do {
-                    fprintf(stream, "> %s", blines[rules->bline-1]);
+                    fprintf(stream, "> %s", blines[rules->bline - 1]);
                     rules = rules->previous;
-                } while (rules != b);
-                /* rules is now the first instruction post-insert */
-                break;
+                } while (rules != d);
+                /* now rules is the first delete after the inserts */
+            }
+            break;
+
+        case OP_INSERT:
+            /* see how many are we adding */
+            b = rules;
+            do {
+                a = b;
+                b = b->previous;
+            } while (b != NULL && b->operation == OP_INSERT &&
+                     b->bline == a->bline + 1);
+
+            if (rules == a)     /* one line */
+                sprintf(tag, "a%d", a->bline);
+            else
+                sprintf(tag, "a%d,%d", rules->bline, a->bline);
+
+            fprintf(stream, "%d%s\n", rules->aline, tag);
+
+            do {
+                fprintf(stream, "> %s", blines[rules->bline - 1]);
+                rules = rules->previous;
+            } while (rules != b);
+            /* rules is now the first instruction post-insert */
+            break;
         }
 
     }
