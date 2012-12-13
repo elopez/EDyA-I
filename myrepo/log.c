@@ -43,14 +43,14 @@ int myrepo_log(void)
         /* Find out the corresponding root tree hash and print it */
         do {
             fgets(tmpread, 200, frev);
-        } while (strncmp("hash=", tmpread, 5) != 0);
+        } while (!feof(frev) && strncmp("hash=", tmpread, 5) != 0);
 
         fprintf(fp, "commit\t#%u %s", revision, tmpread + 5);
 
         /* Find out the corresponding date */
         do {
             fgets(tmpread, 200, frev);
-        } while (strncmp("date=", tmpread, 5) != 0);
+        } while (!feof(frev) && strncmp("date=", tmpread, 5) != 0);
 
         /* Convert timestamp to text and print it */
         time = (time_t) atoi(tmpread + 5);
