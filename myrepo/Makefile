@@ -8,7 +8,7 @@ CFLAGS=-I$(IDIR) -D_POSIX_C_SOURCE=200809L --std=c99
 ifeq ($(DEBUG),)
     CFLAGS+= -DNDEBUG -Ofast -DSPEC_COMPLIANT
 else
-    CFLAGS+=-O0 -g -Wall -Wextra -pedantic
+    CFLAGS+=-O0 -g -Wall -Wextra -pedantic -DWITH_LOCKS
     CC=$(shell which cgcc > /dev/null && echo cgcc || echo gcc)
 endif
 
@@ -37,5 +37,6 @@ $(BIN)/myrepo: $(OBJ)/usage.o $(OBJ)/init.o $(OBJ)/recursive.o \
                $(OBJ)/hashtree.o $(OBJ)/commit.o $(OBJ)/log.o \
                $(OBJ)/patch.o $(OBJ)/diff.o $(OBJ)/readfile.o \
                $(OBJ)/mkpath.o $(OBJ)/cleanup.o $(OBJ)/pager.o \
-               $(OBJ)/salloc.o $(OBJ)/compare.o $(OBJ)/myrepo.o
+               $(OBJ)/salloc.o $(OBJ)/compare.o $(OBJ)/lock.o \
+               $(OBJ)/myrepo.o
 	$(CC) -o $@ $^ $(CFLAGS)

@@ -9,6 +9,7 @@
 #include <myrepo/catalog.h>
 #include <myrepo/commit.h>
 #include <myrepo/compare.h>
+#include <myrepo/lock.h>
 #include <myrepo/log.h>
 #include <myrepo/recursive.h>
 
@@ -18,6 +19,15 @@ int main(int argc, char *argv[])
 {
     /* Run our cleanup when we finish */
     atexit(cleanup_execute);
+
+#ifdef WITH_LOCKS
+    /* Make sure we are the only instance currently running */
+    if (!myrepo_lock())
+        return 0;
+
+    /* Unlock at exit */
+    atexit(myrepo_unlock);
+#endif
 
     if (argc < 2 && argc >= 1)
         return myrepo_usage(argv[0]);
