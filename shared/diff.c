@@ -27,20 +27,17 @@ int diff_lines(struct rule **ruleset, char **alines, unsigned int aqty,
     unsigned int row = 0;
     unsigned int col = 0;
     unsigned int maxqty = (aqty > bqty ? aqty : bqty);
-    unsigned int *last_d_pos = scalloc(2 * maxqty + 1, sizeof(unsigned int));
+    unsigned int *last_d_pos;
     unsigned int lower;
     unsigned int upper;
     unsigned int d;
     unsigned int k;
-    struct rule **rules = scalloc(2 * maxqty + 1, sizeof(struct rule *));
+    struct rule **rules;
     struct rule *rule = NULL, *tmp;
 
     /* find out common strings on start */
     while (row < aqty && row < bqty && strcmp(alines[row], blines[row]) == 0)
         row++;
-
-    last_d_pos[maxqty] = row;
-    rules[maxqty] = NULL;
 
     /* we won't calculate everything in the matrix so we use
      * these to mark the 'top' and 'bottom' diagonals that are
@@ -57,6 +54,12 @@ int diff_lines(struct rule **ruleset, char **alines, unsigned int aqty,
     /* row == aqty && row == bqty */
     if (lower > upper)
         return DIFF_SAME;
+
+    /* Allocate memory */
+    last_d_pos = scalloc(2 * maxqty + 1, sizeof(unsigned int));
+    rules = scalloc(2 * maxqty + 1, sizeof(struct rule *));
+
+    last_d_pos[maxqty] = row;
 
     /* for each value of the edit distance */
     for (d = 1; d <= 2 * maxqty; d++) {
@@ -110,20 +113,29 @@ int diff_lines(struct rule **ruleset, char **alines, unsigned int aqty,
              * stops here */
             if (row == aqty && col == bqty) {
                 *ruleset = diff_invert_rules(rules[k]);
+                free(rules);
+                free(last_d_pos);
                 return DIFF_OK;
             }
 
-            /* range checks */
-            if (row == aqty)
+            /* range checks. We break out of the loop here because otherwise
+             * the next iteration would be working with out of bound values. */
+            if (row == aqty) {
                 lower = k + 2;
-            if (col == bqty)
+                break;
+            }
+            if (col == bqty) {
                 upper = k - 2;
+                break;
+            }
         }
 
         lower--;
         upper++;
     }
 
+    free(rules);
+    free(last_d_pos);
     return DIFF_ERROR;
 }
 
