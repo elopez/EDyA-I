@@ -62,6 +62,15 @@ int main(int argc, char *argv[])
             return myrepo_log();
     }
 
+#ifndef SPEC_COMPLIANT
+    OPTION("checkout") {
+        if (argc >= 3)
+            return myrepo_checkout(atoi(argv[2]));
+        else
+            return myrepo_usage(argv[0]);
+    }
+#endif
+
     OPTION("commit") {
         if (argc >= 4 && !strcmp(argv[2], "-m"))
             return myrepo_commit(argv[3]);
