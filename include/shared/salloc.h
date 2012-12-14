@@ -30,4 +30,13 @@ void *scalloc(size_t nmemb, size_t size);
  */
 void *srealloc(void *ptr, size_t size);
 
+/**
+ * Safe strdup implementation
+ * This will abort program execution if the string copy cannot be
+ * fullfilled as requested.
+ * @param[in]   ptr original string to be duplicated
+ * @return pointer to the duplicated string
+ */
+char *sstrdup(const char *s);
+
 #endif

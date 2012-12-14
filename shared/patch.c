@@ -134,7 +134,7 @@ int patch_file(char **fileold, unsigned int filelen,
             j++;
 
         /* Move the line */
-        newfile[j] = strdup(file[i]);
+        newfile[j] = sstrdup(file[i]);
         i++;
     }
 

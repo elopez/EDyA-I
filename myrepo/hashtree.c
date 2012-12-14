@@ -31,7 +31,7 @@ HashTreeNode *hashtree_new_node(const char *name)
 
     /* Initialize the node */
     tree = scalloc(1, sizeof(HashTreeNode));
-    tree->name = strdup(name);  /* TODO */
+    tree->name = sstrdup(name);
     tree->children = NULL;
     tree->_childpos = 0;
 
@@ -104,7 +104,7 @@ void hashtree_insert(HashTreeNode * tree, char *path, char *hash)
     if (hash == NULL)
         child->hash = hash_file(path);
     else
-        child->hash = strdup(hash);
+        child->hash = sstrdup(hash);
 }
 
 #define PIECE(i) (ntohl(*(unsigned int*)((unsigned char*)bhash + (i)*sizeof(unsigned int))))
@@ -222,7 +222,7 @@ const char *hashtree_fetch(HashTreeNode * tree, const char *cpath)
     unsigned int len;
     char found = 0;
     HashTreeNode *current = tree;
-    char *path = strdup(cpath); /* TODO */
+    char *path = sstrdup(cpath);
 
     assert(tree != NULL);
     assert(path != NULL);

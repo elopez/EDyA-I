@@ -25,7 +25,7 @@ char *hash_file(char *path)
 
     file = fopen(path, "r");
     if (file == NULL)
-        return strdup("deadda1adeadda1adeadda1adeadda1adeadda1a");
+        return sstrdup("deadda1adeadda1adeadda1adeadda1adeadda1a");
 
     /* get some memory to store the hex and bin representation */
     hash = smalloc(41 * sizeof(char));

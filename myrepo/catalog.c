@@ -36,7 +36,7 @@ char *catalog_locate(void)
         return curdir;
     }
 
-    origindir = strdup(curdir);
+    origindir = sstrdup(curdir);
 
     /* visit every parent dir and check for a catalog */
     for (i = strlen(curdir) - 1; i > 0; i--) {
@@ -179,7 +179,7 @@ void catalog_remove(FILE * fp, const char *file)
     fclose(fpn);
 
     /* remove .tmp */
-    oldcatalog = strdup(catalog);
+    oldcatalog = sstrdup(catalog);
     oldcatalog[strlen(oldcatalog) - 4] = '\0';
 
     /* replace the catalog atomically */
