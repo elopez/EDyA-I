@@ -8,7 +8,7 @@ int main(void)
 {
     unsigned int alength, blength, newlength;
     char **alines, **blines, **newfile;
-	unsigned int i = 0;
+    unsigned int i = 0;
 
     FILE* filea = fopen("testfile/diff1", "r");
     FILE* fileb = fopen("patchfile", "r");
@@ -24,8 +24,8 @@ int main(void)
 
     patch_file(alines, alength, blines, blength, &newfile, &newlength);
 
-	while (newfile[i] != NULL)
-		printf("%s", newfile[i++]);
+    while (newfile[i] != NULL)
+        printf("%s", newfile[i++]);
 
     assert(i == newlength);
 
