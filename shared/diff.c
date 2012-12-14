@@ -142,8 +142,13 @@ int diff_lines(struct rule **ruleset, char **alines, unsigned int aqty,
 void diff_print(FILE * stream, struct rule *rules, char **alines, char **blines)
 {
     struct rule *a, *b, *c, *d;
-    unsigned int ischange;
+    unsigned int ischange, isbinary;
     char tag[100];
+
+    /* Small, unreliable hack to detect file type */
+    isbinary = (*alines && (*alines)[strlen(*alines)-1] != '\n') ||
+               (*blines && (*blines)[strlen(*blines)-1] != '\n');
+
     while (rules != NULL) {
         switch (rules->operation) {
         case OP_DELETE:
@@ -190,6 +195,10 @@ void diff_print(FILE * stream, struct rule *rules, char **alines, char **blines)
                 rules = rules->previous;
             } while (rules != b);
             /* now rules is the first insert after the deletes */
+
+            /* Binary files have no newlines at the end of lines */
+            if (isbinary)
+                fprintf(stream, "\n");
 
             if (ischange) {
                 fprintf(stream, "---\n");
