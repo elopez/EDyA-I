@@ -7,6 +7,7 @@
 #include <myrepo/init.h>
 #include <myrepo/usage.h>
 #include <myrepo/catalog.h>
+#include <myrepo/checkout.h>
 #include <myrepo/commit.h>
 #include <myrepo/compare.h>
 #include <myrepo/lock.h>
