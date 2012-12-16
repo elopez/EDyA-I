@@ -6,7 +6,7 @@ BIN=../bin
 CFLAGS=-I$(IDIR) -D_POSIX_C_SOURCE=200809L --std=c99
 
 ifeq ($(DEBUG),)
-    CFLAGS+= -DNDEBUG -Ofast -DSPEC_COMPLIANT
+    CFLAGS+= -DNDEBUG -O2 -DSPEC_COMPLIANT
 else
     CFLAGS+=-O0 -g -Wall -Wextra -pedantic -DWITH_LOCKS
     CC=$(shell which cgcc > /dev/null && echo cgcc || echo gcc)
@@ -24,7 +24,7 @@ clean:
 
 # Don't use -pedantic on the gcc sha1 code
 $(OBJ)/sha1.o: sha1.c
-	$(CC) -c -o $@ $< -I$(IDIR) -Ofast
+	$(CC) -c -o $@ $< -I$(IDIR) -O2
 
 $(OBJ)/%.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

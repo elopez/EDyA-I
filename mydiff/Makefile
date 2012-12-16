@@ -6,7 +6,7 @@ BIN=../bin
 CFLAGS=-I$(IDIR) -D_POSIX_C_SOURCE=200809L --std=c99
 
 ifeq ($(DEBUG),)
-    CFLAGS+= -DNDEBUG -Ofast
+    CFLAGS+= -DNDEBUG -O2
 else
     CFLAGS+=-O0 -g -Wall -Wextra -pedantic
     CC=$(shell which cgcc > /dev/null && echo cgcc || echo gcc)
