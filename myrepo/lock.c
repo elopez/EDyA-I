@@ -21,7 +21,7 @@ int myrepo_lock(void)
         "If you were committing, you should roll back the last unfinished "
         "commit.\nYou can do so by lowering the commit number by one on "
         "repo/.index/revs/latest\nTo continue using myrepo, please remove "
-        "repo/.index/integrity.lock\n";
+        "repo/.index/integrity.check\n";
     struct flock lock = {
         .l_type = F_WRLCK,
         .l_whence = SEEK_SET,
@@ -29,8 +29,17 @@ int myrepo_lock(void)
         .l_len = 1,
     };
 
-    /* Open the myrepo global lock file */
-    if ((lockfd = open("/tmp/myrepo.lock", O_CREAT | O_RDWR, 0666)) < 0) {
+    /* If we are not inside of a repo we cannot have an integrity check
+     * nor a local lock */
+    catalogpath = catalog_locate();
+    if (catalogpath == NULL)
+        return 1;
+
+    /* Open the myrepo local lock file */
+    lockpath = smalloc((strlen(catalogpath) + 25) * sizeof(char));
+    sprintf(lockpath, "%s/.index/myrepo.lock", catalogpath);
+    if ((lockfd = open(lockpath, O_CREAT | O_RDWR, 0666)) < 0) {
+        free(lockpath);
         fprintf(stderr, "%s", lockwarning);
         return 0;
     }
@@ -38,19 +47,14 @@ int myrepo_lock(void)
     /* Ask for a write lock on it */
     if (fcntl(lockfd, F_SETLK, &lock) == -1) {
         fprintf(stderr, "%s", lockwarning);
+        free(lockpath);
         close(lockfd);
         return 0;
     }
 
     /* Now only one myrepo process can run at a time */
 
-    /* If we are not inside of a repo we cannot have an integrity check */
-    catalogpath = catalog_locate();
-    if (catalogpath == NULL)
-        return 1;
-
     /* If integrity check file exists, print a warning and fail to lock */
-    lockpath = smalloc((strlen(catalogpath) + 25) * sizeof(char));
     sprintf(lockpath, "%s/.index/integrity.check", catalogpath);
     if (open(lockpath, O_CREAT | O_EXCL | O_RDWR, 0600) < 0) {
         fprintf(stderr, "%s", integritywarning);
