@@ -7,7 +7,7 @@ FILE *pager_init(void)
     FILE *fp;
 
     /* Try to execute a pager */
-    fp = popen("sensible-pager || less || more || cat 2>/dev/null", "w");
+    fp = popen("sensible-pager 2>/dev/null || less 2>/dev/null || more 2>/dev/null || cat 2>/dev/null", "w");
     if (fp == NULL || fp == (FILE *) - 1)
         return stdout;
 
