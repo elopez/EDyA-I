@@ -60,6 +60,7 @@ char *catalog_locate(void)
     chdir(origindir);
     free(origindir);
     free(curdir);
+    curdir = NULL;
 
     return NULL;
 }
