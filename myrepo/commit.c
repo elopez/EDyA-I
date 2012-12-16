@@ -313,6 +313,10 @@ int commit_diff(char *catalogpath, unsigned int revision, const char *file,
         freereadfile(fcontents);
         fclose(fcurrent);
         return 0;
+    } else if (fcurrent == NULL) {
+        fprintf(fp, "The file %s\n",
+                errno == ENOENT ? "has been deleted" : "is unaccesible");
+        return 0;
     }
 
     /* TODO: what happens on display mode when file doesn't exist? */

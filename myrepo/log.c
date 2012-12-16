@@ -93,9 +93,6 @@ int myrepo_logdiff(unsigned int revision)
         return 1;
     }
 
-    /* Initialize output stream */
-    fp = pager_init();
-
     /* Hash the current catalog but do not store it to disk */
     catalog_hash(catalog, &new, 0);
 
@@ -106,25 +103,29 @@ int myrepo_logdiff(unsigned int revision)
         hashtree_compute(old);
     } else {
         old = commit_loadtree(catalogpath, revision);
-        if (old == NULL) {
-            pager_close(fp);
+        if (old == NULL)
             return 1;
-        }
     }
 
     /* Compare the trees */
     differences = hashtree_compare(old, new);
 
+    /* No changes, just inform so and quit */
     if (differences == NULL) {
         printf("No changes.\n");
-    } else {
-        for (int i = 0; differences[i] != NULL; i++) {
-            fprintf(fp, "File: %s\n", differences[i]);
-            commit_diff(catalogpath, revision, differences[i], fp);
-            fprintf(fp, "\n\n");
-        }
-        free(differences);
+        return 0;
     }
+
+    /* Initialize output stream */
+    fp = pager_init();
+
+    /* Print the differences */
+    for (int i = 0; differences[i] != NULL; i++) {
+        fprintf(fp, "File: %s\n", differences[i]);
+        commit_diff(catalogpath, revision, differences[i], fp);
+        fprintf(fp, "\n\n");
+    }
+    free(differences);
 
     pager_close(fp);
 

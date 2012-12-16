@@ -19,5 +19,7 @@ int pager_close(FILE * fp)
     if (fp == stdout)
         return 0;
 
+    fflush(fp);
+
     return pclose(fp);
 }
