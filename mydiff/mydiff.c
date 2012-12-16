@@ -60,10 +60,10 @@ int main(int argc, char *argv[])
     /* Don't print rules if the files are identical */
     if (status != DIFF_SAME) {
         diff_print(stdout, rules, alines, blines);
+        diff_free_rules(rules);
     }
 
     /* Free and close everything */
-    diff_free_rules(rules);
     freereadfile(alines);
     freereadfile(blines);
     fclose(filea);
