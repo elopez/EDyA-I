@@ -10,3 +10,18 @@ algoritmo implementado en `my-diff`.
 
 Para una explicación completa de la tarea a realizar, vea `doc/Enunciado.pdf`
 
+Licencia
+========
+
+Este proyecto es software libre; usted puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU publicada por
+la Free Software Foundation; tanto bajo la versión 2 de dicha Licencia o bien
+(según su elección) bajo cualquier versión posterior.
+
+Este proyecto se distribuye con la esperanza de que sea útil, pero
+SIN NINGUNA GARANTÍA, incluso sin la garantía MERCANTIL implícita o sin
+garantizar la CONVENIENCIA PARA UN PROPÓSITO PARTICULAR. Véase la
+Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General junto con
+este proyecto. Si no ha sido así, vea <http://www.gnu.org/copyleft/gpl.html>
